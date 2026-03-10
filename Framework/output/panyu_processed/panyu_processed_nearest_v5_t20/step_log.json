@@ -1,0 +1,542 @@
+[
+  {
+    "time": 0,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 1,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 2,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 3,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 4,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 5,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 6,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 7,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 8,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 120.0
+  },
+  {
+    "time": 9,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 119.7
+  },
+  {
+    "time": 10,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 119.4
+  },
+  {
+    "time": 11,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 118.8
+  },
+  {
+    "time": 12,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 117.6
+  },
+  {
+    "time": 13,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 116.4
+  },
+  {
+    "time": 14,
+    "total_score": 0.0,
+    "pending_tasks": 0,
+    "completed_tasks": 0,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 115.2
+  },
+  {
+    "time": 15,
+    "total_score": 192.3377,
+    "pending_tasks": 0,
+    "completed_tasks": 2,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 113.9459
+  },
+  {
+    "time": 16,
+    "total_score": 192.3377,
+    "pending_tasks": 0,
+    "completed_tasks": 2,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 112.4459
+  },
+  {
+    "time": 17,
+    "total_score": 375.9256,
+    "pending_tasks": 0,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 111.2085
+  },
+  {
+    "time": 18,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 109.7085
+  },
+  {
+    "time": 19,
+    "total_score": 375.9256,
+    "pending_tasks": 3,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 108.4544
+  },
+  {
+    "time": 20,
+    "total_score": 375.9256,
+    "pending_tasks": 1,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 106.9544
+  },
+  {
+    "time": 21,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 105.4544
+  },
+  {
+    "time": 22,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 103.9544
+  },
+  {
+    "time": 23,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 102.4544
+  },
+  {
+    "time": 24,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 101.1343
+  },
+  {
+    "time": 25,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 99.6343
+  },
+  {
+    "time": 26,
+    "total_score": 375.9256,
+    "pending_tasks": 2,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 98.2171
+  },
+  {
+    "time": 27,
+    "total_score": 375.9256,
+    "pending_tasks": 1,
+    "completed_tasks": 4,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 96.7171
+  },
+  {
+    "time": 28,
+    "total_score": 653.7056,
+    "pending_tasks": 1,
+    "completed_tasks": 7,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 95.8771
+  },
+  {
+    "time": 29,
+    "total_score": 653.7056,
+    "pending_tasks": 1,
+    "completed_tasks": 7,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 94.3771
+  },
+  {
+    "time": 30,
+    "total_score": 653.7056,
+    "pending_tasks": 1,
+    "completed_tasks": 7,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 92.8771
+  },
+  {
+    "time": 31,
+    "total_score": 653.7056,
+    "pending_tasks": 1,
+    "completed_tasks": 7,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 91.3771
+  },
+  {
+    "time": 32,
+    "total_score": 653.7056,
+    "pending_tasks": 2,
+    "completed_tasks": 7,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 90.073
+  },
+  {
+    "time": 33,
+    "total_score": 745.8317,
+    "pending_tasks": 1,
+    "completed_tasks": 8,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 88.8484
+  },
+  {
+    "time": 34,
+    "total_score": 824.5554,
+    "pending_tasks": 1,
+    "completed_tasks": 9,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 87.5229
+  },
+  {
+    "time": 35,
+    "total_score": 921.3798,
+    "pending_tasks": 1,
+    "completed_tasks": 10,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 86.0644
+  },
+  {
+    "time": 36,
+    "total_score": 921.3798,
+    "pending_tasks": 1,
+    "completed_tasks": 10,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 84.5644
+  },
+  {
+    "time": 37,
+    "total_score": 921.3798,
+    "pending_tasks": 2,
+    "completed_tasks": 10,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 83.5285
+  },
+  {
+    "time": 38,
+    "total_score": 921.3798,
+    "pending_tasks": 1,
+    "completed_tasks": 10,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 82.0699
+  },
+  {
+    "time": 39,
+    "total_score": 921.3798,
+    "pending_tasks": 0,
+    "completed_tasks": 10,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 80.5699
+  },
+  {
+    "time": 40,
+    "total_score": 921.3798,
+    "pending_tasks": 0,
+    "completed_tasks": 10,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 79.3453
+  },
+  {
+    "time": 41,
+    "total_score": 1017.5494,
+    "pending_tasks": 0,
+    "completed_tasks": 11,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 78.0352
+  },
+  {
+    "time": 42,
+    "total_score": 1017.5494,
+    "pending_tasks": 0,
+    "completed_tasks": 11,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 76.5352
+  },
+  {
+    "time": 43,
+    "total_score": 1111.2617,
+    "pending_tasks": 1,
+    "completed_tasks": 12,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 75.0726
+  },
+  {
+    "time": 44,
+    "total_score": 1207.6964,
+    "pending_tasks": 1,
+    "completed_tasks": 13,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 73.7842
+  },
+  {
+    "time": 45,
+    "total_score": 1207.6964,
+    "pending_tasks": 1,
+    "completed_tasks": 13,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 72.474
+  },
+  {
+    "time": 46,
+    "total_score": 1207.6964,
+    "pending_tasks": 0,
+    "completed_tasks": 13,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 70.974
+  },
+  {
+    "time": 47,
+    "total_score": 1207.6964,
+    "pending_tasks": 1,
+    "completed_tasks": 13,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 69.474
+  },
+  {
+    "time": 48,
+    "total_score": 1293.4361,
+    "pending_tasks": 1,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 68.4321
+  },
+  {
+    "time": 49,
+    "total_score": 1293.4361,
+    "pending_tasks": 0,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 66.9696
+  },
+  {
+    "time": 50,
+    "total_score": 1293.4361,
+    "pending_tasks": 1,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 65.7696
+  },
+  {
+    "time": 51,
+    "total_score": 1293.4361,
+    "pending_tasks": 1,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 64.2696
+  },
+  {
+    "time": 52,
+    "total_score": 1293.4361,
+    "pending_tasks": 1,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 62.7696
+  },
+  {
+    "time": 53,
+    "total_score": 1293.4361,
+    "pending_tasks": 1,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 61.2696
+  },
+  {
+    "time": 54,
+    "total_score": 1293.4361,
+    "pending_tasks": 1,
+    "completed_tasks": 14,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 59.9441
+  },
+  {
+    "time": 55,
+    "total_score": 1382.5675,
+    "pending_tasks": 1,
+    "completed_tasks": 15,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 58.9213
+  },
+  {
+    "time": 56,
+    "total_score": 1382.5675,
+    "pending_tasks": 1,
+    "completed_tasks": 15,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 57.7213
+  },
+  {
+    "time": 57,
+    "total_score": 1566.1034,
+    "pending_tasks": 2,
+    "completed_tasks": 17,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 56.5999
+  },
+  {
+    "time": 58,
+    "total_score": 1566.1034,
+    "pending_tasks": 2,
+    "completed_tasks": 17,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 55.3465
+  },
+  {
+    "time": 59,
+    "total_score": 1566.1034,
+    "pending_tasks": 1,
+    "completed_tasks": 17,
+    "expired_tasks": 0,
+    "charging_queue_total": 0,
+    "avg_battery": 53.8465
+  }
+]

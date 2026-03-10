@@ -1,0 +1,38 @@
+[
+  {
+    "scenario": "panyu_processed",
+    "scheduler": "nearest",
+    "log_dir": "",
+    "time": 360,
+    "total_score": 9558.5759,
+    "completed": 108,
+    "expired": 5,
+    "pending": 1,
+    "assigned": 6,
+    "run_steps": 360,
+    "total_distance": 2609.7145,
+    "avg_vehicle_utilization": 0.5878,
+    "avg_station_queue_length": 0.0,
+    "avg_task_completion_time": 8.0556,
+    "avg_charge_waiting_time": 0.0,
+    "charge_sessions": 21
+  },
+  {
+    "scenario": "panyu_processed",
+    "scheduler": "heaviest",
+    "log_dir": "",
+    "time": 360,
+    "total_score": 9566.9697,
+    "completed": 108,
+    "expired": 5,
+    "pending": 1,
+    "assigned": 6,
+    "run_steps": 360,
+    "total_distance": 2606.9266,
+    "avg_vehicle_utilization": 0.585,
+    "avg_station_queue_length": 0.0,
+    "avg_task_completion_time": 7.8519,
+    "avg_charge_waiting_time": 0.0,
+    "charge_sessions": 22
+  }
+]
