@@ -1,3 +1,0 @@
-scenario,scheduler,log_dir,time,total_score,completed,expired,pending,assigned,run_steps,total_distance,avg_vehicle_utilization,avg_station_queue_length,avg_task_completion_time,avg_charge_waiting_time,charge_sessions
-panyu_processed,nearest,,360,9558.5759,108,5,1,6,360,2609.7145,0.5878,0.0,8.0556,0.0,21
-panyu_processed,heaviest,,360,9566.9697,108,5,1,6,360,2606.9266,0.585,0.0,7.8519,0.0,22

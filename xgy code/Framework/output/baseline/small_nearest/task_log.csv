@@ -1,0 +1,95 @@
+time,event_type,task_id,status,release_time,deadline,origin_node,weight,collaborative,delivered_weight,remaining_weight,assigned_vehicles,assigned_vehicle,assigned_time,service_distance,service_duration,complete_time
+0,released,28,pending,0,66,20,7.09,False,0.0,7.09,{},,,0.0,0,
+0,assigned,28,assigned,0,66,20,7.09,False,0.0,7.09,{0: 7.09},0,0,0.0,0,
+4,completed,28,completed,0,66,20,7.09,False,7.09,0.0,{},0,0,6.1381,4,4
+8,released,29,pending,8,88,19,29.72,False,0.0,29.72,{},,,0.0,0,
+8,assigned,29,assigned,8,88,19,29.72,False,0.0,29.72,{1: 29.72},1,8,0.0,0,
+11,released,1,pending,11,41,17,120.45,True,0.0,120.45,{},,,0.0,0,
+11,assigned,1,assigned,11,41,17,120.45,True,0.0,120.45,{0: 80.0},,11,0.0,0,
+11,assigned,1,assigned,11,41,17,120.45,True,0.0,120.45,"{0: 80.0, 2: 40.45}",,11,0.0,0,
+11,completed,29,completed,8,88,19,29.72,False,29.72,0.0,{},1,8,5.8317,3,11
+20,partial_delivered,1,assigned,11,41,17,120.45,True,80.0,40.45,{2: 40.45},,11,14.9978,9,
+20,completed,1,completed,11,41,17,120.45,True,120.45,0.0,{},,11,29.9956,9,20
+22,released,4,pending,22,78,9,88.8,True,0.0,88.8,{},,,0.0,0,
+22,assigned,4,assigned,22,78,9,88.8,True,0.0,88.8,{1: 80.0},,22,0.0,0,
+22,assigned,4,assigned,22,78,9,88.8,True,0.0,88.8,"{1: 80.0, 3: 8.799999999999997}",,22,0.0,0,
+29,released,6,pending,29,96,3,127.66,True,0.0,127.66,{},,,0.0,0,
+31,assigned,6,assigned,29,96,3,127.66,True,0.0,127.66,{0: 80.0},,31,0.0,0,
+31,assigned,6,assigned,29,96,3,127.66,True,0.0,127.66,"{0: 80.0, 2: 47.66}",,31,0.0,0,
+33,partial_delivered,6,assigned,29,96,3,127.66,True,80.0,47.66,{2: 47.66},,31,4.1706,2,
+33,partial_delivered,4,assigned,22,78,9,88.8,True,80.0,8.8,{3: 8.799999999999997},,22,17.149,11,
+33,completed,6,completed,29,96,3,127.66,True,127.66,0.0,{},,31,8.3413,2,33
+33,completed,4,completed,22,78,9,88.8,True,88.8,0.0,{},,22,34.298,11,33
+35,released,22,pending,35,86,3,12.81,False,0.0,12.81,{},,,0.0,0,
+35,assigned,22,assigned,35,86,3,12.81,False,0.0,12.81,{4: 12.81},4,35,0.0,0,
+37,completed,22,completed,35,86,3,12.81,False,12.81,0.0,{},4,35,4.1706,2,37
+38,released,15,pending,38,85,3,15.78,False,0.0,15.78,{},,,0.0,0,
+38,assigned,15,assigned,38,85,3,15.78,False,0.0,15.78,{0: 15.78},0,38,0.0,0,
+40,completed,15,completed,38,85,3,15.78,False,15.78,0.0,{},0,38,4.1706,2,40
+48,released,26,pending,48,74,22,10.88,False,0.0,10.88,{},,,0.0,0,
+48,assigned,26,assigned,48,74,22,10.88,False,0.0,10.88,{0: 10.88},0,48,0.0,0,
+51,released,20,pending,51,125,25,92.66,True,0.0,92.66,{},,,0.0,0,
+51,assigned,20,assigned,51,125,25,92.66,True,0.0,92.66,{1: 80.0},,51,0.0,0,
+51,assigned,20,assigned,51,125,25,92.66,True,0.0,92.66,"{1: 80.0, 2: 12.659999999999997}",,51,0.0,0,
+53,released,2,pending,53,103,15,14.31,False,0.0,14.31,{},,,0.0,0,
+53,assigned,2,assigned,53,103,15,14.31,False,0.0,14.31,{3: 14.31},3,53,0.0,0,
+55,completed,26,completed,48,74,22,10.88,False,10.88,0.0,{},0,48,10.6598,7,55
+57,partial_delivered,20,assigned,51,125,25,92.66,True,80.0,12.66,{2: 12.659999999999997},,51,9.3731,6,
+57,completed,20,completed,51,125,25,92.66,True,92.66,0.0,{},,51,18.7462,6,57
+58,released,0,pending,58,106,23,4.66,False,0.0,4.66,{},,,0.0,0,
+58,assigned,0,assigned,58,106,23,4.66,False,0.0,4.66,{4: 4.66},4,58,0.0,0,
+59,completed,2,completed,53,103,15,14.31,False,14.31,0.0,{},3,53,10.1425,6,59
+63,completed,0,completed,58,106,23,4.66,False,4.66,0.0,{},4,58,8.266,5,63
+75,released,17,pending,75,121,9,89.35,True,0.0,89.35,{},,,0.0,0,
+75,assigned,17,assigned,75,121,9,89.35,True,0.0,89.35,{0: 80.0},,75,0.0,0,
+75,assigned,17,assigned,75,121,9,89.35,True,0.0,89.35,"{0: 80.0, 1: 9.349999999999994}",,75,0.0,0,
+86,released,8,pending,86,126,21,15.43,False,0.0,15.43,{},,,0.0,0,
+86,assigned,8,assigned,86,126,21,15.43,False,0.0,15.43,{2: 15.43},2,86,0.0,0,
+86,partial_delivered,17,assigned,75,121,9,89.35,True,80.0,9.35,{1: 9.349999999999994},,75,17.149,11,
+86,completed,17,completed,75,121,9,89.35,True,89.35,0.0,{},,75,34.298,11,86
+90,completed,8,completed,86,126,21,15.43,False,15.43,0.0,{},2,86,7.3434,4,90
+91,released,12,pending,91,170,25,4.91,False,0.0,4.91,{},,,0.0,0,
+91,assigned,12,assigned,91,170,25,4.91,False,0.0,4.91,{3: 4.91},3,91,0.0,0,
+96,released,18,pending,96,140,6,26.85,False,0.0,26.85,{},,,0.0,0,
+96,assigned,18,assigned,96,140,6,26.85,False,0.0,26.85,{2: 26.85},2,96,0.0,0,
+97,released,21,pending,97,143,8,17.5,False,0.0,17.5,{},,,0.0,0,
+97,assigned,21,assigned,97,143,8,17.5,False,0.0,17.5,{4: 17.5},4,97,0.0,0,
+97,completed,12,completed,91,170,25,4.91,False,4.91,0.0,{},3,91,9.3731,6,97
+98,released,7,pending,98,162,2,4.12,False,0.0,4.12,{},,,0.0,0,
+99,released,3,pending,99,155,13,27.02,False,0.0,27.02,{},,,0.0,0,
+105,assigned,7,assigned,98,162,2,4.12,False,0.0,4.12,{3: 4.12},3,105,0.0,0,
+109,completed,18,completed,96,140,6,26.85,False,26.85,0.0,{},2,96,19.5623,13,109
+109,completed,21,completed,97,143,8,17.5,False,17.5,0.0,{},4,97,18.1141,12,109
+114,completed,7,completed,98,162,2,4.12,False,4.12,0.0,{},3,105,14.6648,9,114
+116,released,11,pending,116,187,18,13.91,False,0.0,13.91,{},,,0.0,0,
+123,assigned,3,assigned,99,155,13,27.02,False,0.0,27.02,{4: 27.02},4,123,0.0,0,
+125,assigned,11,assigned,116,187,18,13.91,False,0.0,13.91,{1: 13.91},1,125,0.0,0,
+129,released,16,pending,129,198,1,10.98,False,0.0,10.98,{},,,0.0,0,
+129,released,25,pending,129,185,3,29.42,False,0.0,29.42,{},,,0.0,0,
+129,assigned,25,assigned,129,185,3,29.42,False,0.0,29.42,{2: 29.42},2,129,0.0,0,
+131,completed,25,completed,129,185,3,29.42,False,29.42,0.0,{},2,129,4.1706,2,131
+132,released,9,pending,132,170,3,5.12,False,0.0,5.12,{},,,0.0,0,
+133,released,5,pending,133,184,24,27.42,False,0.0,27.42,{},,,0.0,0,
+134,completed,3,completed,99,155,13,27.02,False,27.02,0.0,{},4,123,17.2102,11,134
+138,released,10,pending,138,165,19,6.62,False,0.0,6.62,{},,,0.0,0,
+140,completed,11,completed,116,187,18,13.91,False,13.91,0.0,{},1,125,22.5095,15,140
+146,released,27,pending,146,178,12,11.19,False,0.0,11.19,{},,,0.0,0,
+147,assigned,9,assigned,132,170,3,5.12,False,0.0,5.12,{4: 5.12},4,147,0.0,0,
+149,completed,9,completed,132,170,3,5.12,False,5.12,0.0,{},4,147,4.1706,2,149
+150,released,23,pending,150,179,3,91.8,True,0.0,91.8,{},,,0.0,0,
+152,assigned,5,assigned,133,184,24,27.42,False,0.0,27.42,{3: 27.42},3,152,0.0,0,
+153,released,13,pending,153,184,12,10.1,False,0.0,10.1,{},,,0.0,0,
+155,assigned,10,assigned,138,165,19,6.62,False,0.0,6.62,{1: 6.62},1,155,0.0,0,
+155,completed,5,completed,133,184,24,27.42,False,27.42,0.0,{},3,152,4.7801,3,155
+158,completed,10,completed,138,165,19,6.62,False,6.62,0.0,{},1,155,5.8317,3,158
+163,assigned,16,assigned,129,198,1,10.98,False,0.0,10.98,{1: 10.98},1,163,0.0,0,
+164,released,14,pending,164,242,10,19.1,False,0.0,19.1,{},,,0.0,0,
+165,assigned,14,assigned,164,242,10,19.1,False,0.0,19.1,{3: 19.1},3,165,0.0,0,
+167,completed,14,completed,164,242,10,19.1,False,19.1,0.0,{},3,165,3.8675,2,167
+168,released,19,pending,168,218,1,125.3,True,0.0,125.3,{},,,0.0,0,
+169,released,24,pending,169,200,5,16.29,False,0.0,16.29,{},,,0.0,0,
+170,completed,16,completed,129,198,1,10.98,False,10.98,0.0,{},1,163,11.7323,7,170
+171,assigned,13,assigned,153,184,12,10.1,False,0.0,10.1,{3: 10.1},3,171,0.0,0,
+179,expired,27,expired,146,178,12,11.19,False,0.0,11.19,{},,,0.0,0,179
+179,assigned,24,assigned,169,200,5,16.29,False,0.0,16.29,{1: 16.29},1,179,0.0,0,
+179,completed,13,completed,153,184,12,10.1,False,10.1,0.0,{},3,171,12.5898,8,179
