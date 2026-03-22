@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { SimulationState, SchedulingStrategy, ProblemScale } from './types';
+import { SimulationState, SchedulingStrategy, ProblemScale, Node, Edge } from './types';
 import { SimulationEngine, ProblemScales, getSimulationEngine } from './core/simulation';
 import {
   MapCanvas,
@@ -12,22 +12,129 @@ import {
   ControlPanel,
   StatisticsPanel
 } from './components';
-import { AchievementPanel, ComboCounter, ProgressRing } from './components/GameElements';
 import { LoginModal, UserProfile, useAuth } from './components/LoginModal';
-import { LeaderboardPanel, MiniLeaderboard } from './components/Leaderboard';
+import { LeaderboardPanel } from './components/Leaderboard';
+import { apiClient, realtimeConnection } from './services/api';
 import { getAuthService } from './services/auth';
+
+const USE_REMOTE_ENGINE = process.env.NEXT_PUBLIC_USE_ENGINE_BACKEND === '1';
+
+function buildDefaultState(): SimulationState {
+  return {
+    status: 'idle',
+    currentTime: 0,
+    vehicles: [],
+    tasks: [],
+    chargingStations: [],
+    warehouses: [],
+    graph: { nodes: new Map(), edges: new Map() },
+    statistics: {
+      totalTasks: 0,
+      completedTasks: 0,
+      failedTasks: 0,
+      pendingTasks: 0,
+      totalScore: 0,
+      totalDistance: 0,
+      averageDeliveryTime: 0,
+      vehicleUtilization: 0,
+      chargingStationUtilization: 0,
+      onTimeRate: 0,
+      collaborativeTasks: 0,
+    },
+    config: {
+      scale: ProblemScales[1],
+      strategy: 'nearest_first',
+      simulationSpeed: 1,
+      maxSimulationTime: 480,
+      enableCollaboration: false,
+    },
+    eventLog: [],
+  };
+}
+
+function normalizeRemoteState(raw: unknown, fallback: SimulationState): SimulationState {
+  if (!raw || typeof raw !== 'object') {
+    return fallback;
+  }
+
+  const payload = raw as Record<string, unknown>;
+  const graphRaw = (payload.graph as Record<string, unknown> | undefined) || {};
+
+  const nodeList = Array.isArray(graphRaw.nodes) ? graphRaw.nodes : [];
+  const edgeList = Array.isArray(graphRaw.edges) ? graphRaw.edges : [];
+
+  const nodeMap = new Map<string, Node>();
+  for (const node of nodeList) {
+    const n = node as Record<string, unknown>;
+    const id = String(n.id ?? '');
+    const position = (n.position as Record<string, unknown> | undefined) || {};
+    const rawType = String(n.type ?? 'intersection');
+    const nodeType: Node['type'] =
+      rawType === 'warehouse' ||
+      rawType === 'charging_station' ||
+      rawType === 'delivery_point' ||
+      rawType === 'intersection'
+        ? rawType
+        : 'intersection';
+    nodeMap.set(id, {
+      id,
+      position: {
+        x: Number(position.x ?? 0),
+        y: Number(position.y ?? 0),
+      },
+      type: nodeType,
+      name: (n.name as string) || undefined,
+    });
+  }
+
+  const edgeMap = new Map<string, Edge[]>();
+  for (const edge of edgeList) {
+    const e = edge as Record<string, unknown>;
+    const from = String(e.from ?? '');
+    const next = {
+      id: String(e.id ?? `${from}_${String(e.to ?? '')}`),
+      from,
+      to: String(e.to ?? ''),
+      distance: Number(e.distance ?? 0),
+      trafficFactor: Number(e.trafficFactor ?? 1),
+    };
+    const existed = edgeMap.get(from) || [];
+    existed.push(next);
+    edgeMap.set(from, existed);
+  }
+
+  const nextState: SimulationState = {
+    status: (payload.status as SimulationState['status']) || fallback.status,
+    currentTime: Number(payload.currentTime ?? fallback.currentTime),
+    vehicles: (Array.isArray(payload.vehicles) ? payload.vehicles : fallback.vehicles) as SimulationState['vehicles'],
+    tasks: (Array.isArray(payload.tasks) ? payload.tasks : fallback.tasks) as SimulationState['tasks'],
+    chargingStations: (
+      Array.isArray(payload.chargingStations) ? payload.chargingStations : fallback.chargingStations
+    ) as SimulationState['chargingStations'],
+    warehouses: (Array.isArray(payload.warehouses) ? payload.warehouses : fallback.warehouses) as SimulationState['warehouses'],
+    graph: {
+      nodes: nodeMap,
+      edges: edgeMap,
+    },
+    statistics: (payload.statistics as SimulationState['statistics']) || fallback.statistics,
+    config: (payload.config as SimulationState['config']) || fallback.config,
+    eventLog: (Array.isArray(payload.eventLog) ? payload.eventLog : fallback.eventLog) as SimulationState['eventLog'],
+  };
+
+  return nextState;
+}
 
 export default function Home() {
   const engineRef = useRef<SimulationEngine | null>(null);
-  const [state, setState] = useState<SimulationState | null>(null);
+  const [state, setState] = useState<SimulationState | null>(() =>
+    USE_REMOTE_ENGINE ? buildDefaultState() : null
+  );
+  const [remoteSimulationId, setRemoteSimulationId] = useState<string | null>(null);
+  const remoteSimulationIdRef = useRef<string | null>(null);
+  const remoteListenerRef = useRef<((data: unknown) => void) | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | undefined>();
   const [activeTab, setActiveTab] = useState<'vehicles' | 'tasks' | 'stations'>('vehicles');
   const [isInitialized, setIsInitialized] = useState(false);
-  
-  // 连击计数
-  const [combo, setCombo] = useState(0);
-  const [lastDeliveryTime, setLastDeliveryTime] = useState(0);
-  const prevCompletedRef = useRef(0);
 
   // 登录状态
   const { user, login, logout } = useAuth();
@@ -37,8 +144,37 @@ export default function Home() {
   // 游戏结束时提交成绩
   const gameEndSubmittedRef = useRef(false);
 
-  // 初始化模拟引擎
   useEffect(() => {
+    remoteSimulationIdRef.current = remoteSimulationId;
+  }, [remoteSimulationId]);
+
+  // 初始化模拟引擎（本地/远端双模式）
+  useEffect(() => {
+    if (USE_REMOTE_ENGINE) {
+      const defaultState = buildDefaultState();
+      const listener = (data: unknown) => {
+        setState((prev) => normalizeRemoteState(data, prev ?? defaultState));
+      };
+      remoteListenerRef.current = listener;
+      realtimeConnection.on('simulation_state', listener);
+      realtimeConnection.connect().catch((err) => {
+        console.error('Realtime connection failed:', err);
+      });
+
+      queueMicrotask(() => setIsInitialized(true));
+
+      return () => {
+        if (remoteListenerRef.current) {
+          realtimeConnection.off('simulation_state', remoteListenerRef.current);
+        }
+        realtimeConnection.disconnect();
+        const simId = remoteSimulationIdRef.current;
+        if (simId) {
+          apiClient.stopSimulation(simId).catch(() => undefined);
+        }
+      };
+    }
+
     const engine = getSimulationEngine();
     engineRef.current = engine;
 
@@ -56,26 +192,12 @@ export default function Home() {
       enableCollaboration: false
     });
 
-    setIsInitialized(true);
+    queueMicrotask(() => setIsInitialized(true));
 
     return () => {
       engine.stop();
     };
   }, []);
-
-  // 连击检测
-  useEffect(() => {
-    if (state && state.statistics.completedTasks > prevCompletedRef.current) {
-      const timeDiff = Date.now() - lastDeliveryTime;
-      if (timeDiff < 5000) { // 5秒内完成多个任务
-        setCombo(prev => prev + 1);
-      } else {
-        setCombo(1);
-      }
-      setLastDeliveryTime(Date.now());
-      prevCompletedRef.current = state.statistics.completedTasks;
-    }
-  }, [state?.statistics.completedTasks, lastDeliveryTime, state]);
 
   // 游戏结束时提交成绩
   useEffect(() => {
@@ -101,31 +223,124 @@ export default function Home() {
   }, [state?.status, user, state?.statistics, state?.config, state?.currentTime]);
 
   // 控制函数
-  const handleStart = useCallback(() => {
-    engineRef.current?.start();
-  }, []);
+  const handleStart = useCallback(async () => {
+    if (!state) return;
 
-  const handlePause = useCallback(() => {
-    engineRef.current?.pause();
-  }, []);
+    if (!USE_REMOTE_ENGINE) {
+      engineRef.current?.start();
+      return;
+    }
 
-  const handleStop = useCallback(() => {
-    engineRef.current?.stop();
-  }, []);
+    if (remoteSimulationId && state.status === 'paused') {
+      await apiClient.resumeSimulation(remoteSimulationId);
+      return;
+    }
 
-  const handleReset = useCallback(() => {
-    engineRef.current?.reset();
-  }, []);
+    if (remoteSimulationId) {
+      await apiClient.stopSimulation(remoteSimulationId);
+      setRemoteSimulationId(null);
+    }
+
+    const started = await apiClient.startSimulation(state.config);
+    if (!started.success || !started.data?.simulationId) {
+      console.error('Failed to start remote simulation:', started.error);
+      return;
+    }
+
+    const simulationId = started.data.simulationId;
+    setRemoteSimulationId(simulationId);
+    realtimeConnection.send('subscribe', { simulationId });
+  }, [remoteSimulationId, state]);
+
+  const handlePause = useCallback(async () => {
+    if (!USE_REMOTE_ENGINE) {
+      engineRef.current?.pause();
+      return;
+    }
+    if (!remoteSimulationId) return;
+    await apiClient.pauseSimulation(remoteSimulationId);
+  }, [remoteSimulationId]);
+
+  const handleStop = useCallback(async () => {
+    if (!USE_REMOTE_ENGINE) {
+      engineRef.current?.stop();
+      return;
+    }
+    if (!remoteSimulationId) return;
+    await apiClient.stopSimulation(remoteSimulationId);
+    realtimeConnection.send('unsubscribe', { simulationId: remoteSimulationId });
+    setRemoteSimulationId(null);
+    setState((prev) => {
+      if (!prev) return prev;
+      return { ...prev, status: 'idle' };
+    });
+  }, [remoteSimulationId]);
+
+  const handleReset = useCallback(async () => {
+    if (!USE_REMOTE_ENGINE) {
+      engineRef.current?.reset();
+      return;
+    }
+
+    if (remoteSimulationId) {
+      await apiClient.stopSimulation(remoteSimulationId);
+      realtimeConnection.send('unsubscribe', { simulationId: remoteSimulationId });
+      setRemoteSimulationId(null);
+    }
+    setState((prev) => {
+      if (!prev) return prev;
+      return { ...buildDefaultState(), config: prev.config };
+    });
+  }, [remoteSimulationId]);
 
   const handleSpeedChange = useCallback((speed: number) => {
+    if (USE_REMOTE_ENGINE) {
+      setState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          config: {
+            ...prev.config,
+            simulationSpeed: speed,
+          },
+        };
+      });
+      return;
+    }
     engineRef.current?.setSpeed(speed);
   }, []);
 
   const handleStrategyChange = useCallback((strategy: SchedulingStrategy) => {
+    if (USE_REMOTE_ENGINE) {
+      setState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          config: {
+            ...prev.config,
+            strategy,
+          },
+        };
+      });
+      return;
+    }
     engineRef.current?.setStrategy(strategy);
   }, []);
 
   const handleScaleChange = useCallback((scale: ProblemScale) => {
+    if (USE_REMOTE_ENGINE) {
+      setState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          config: {
+            ...prev.config,
+            scale,
+          },
+        };
+      });
+      return;
+    }
     const engine = engineRef.current;
     if (engine) {
       engine.initialize({
@@ -136,6 +351,19 @@ export default function Home() {
   }, []);
 
   const handleCollaborationChange = useCallback((enabled: boolean) => {
+    if (USE_REMOTE_ENGINE) {
+      setState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          config: {
+            ...prev.config,
+            enableCollaboration: enabled,
+          },
+        };
+      });
+      return;
+    }
     engineRef.current?.setCollaboration(enabled);
   }, []);
 
@@ -158,9 +386,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white particle-bg">
-      {/* 连击显示 */}
-      <ComboCounter combo={combo} lastDeliveryTime={lastDeliveryTime} />
-      
       {/* 顶部导航栏 */}
       <header className="bg-gray-900/90 backdrop-blur border-b border-gray-800 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -174,11 +399,9 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             {/* 快速统计 */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-800/50 rounded-lg border border-gray-700">
-              <ProgressRing progress={state.statistics.onTimeRate} size={28} strokeWidth={3} color="#10B981">
-                <span className="text-[8px] text-green-400">{state.statistics.onTimeRate.toFixed(0)}%</span>
-              </ProgressRing>
-              <span className="text-xs text-gray-400">准时率</span>
+            <div className="px-3 py-1.5 bg-gray-800/50 rounded-lg border border-gray-700 text-sm">
+              <span className="text-gray-400 mr-2">准时率</span>
+              <span className="text-green-400 font-semibold">{state.statistics.onTimeRate.toFixed(0)}%</span>
             </div>
             
             {/* 排行榜按钮 */}
@@ -345,11 +568,6 @@ export default function Home() {
                 vehicles={state.vehicles}
               />
             )}
-
-            {/* 成就系统 */}
-            <div className="mt-4">
-              <AchievementPanel statistics={state.statistics} />
-            </div>
           </div>
         </div>
       </main>

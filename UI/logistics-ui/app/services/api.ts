@@ -243,6 +243,20 @@ class ApiClient {
     return this.request(`/simulation/${simulationId}/stop`, 'POST');
   }
 
+  // 暂停模拟
+  async pauseSimulation(
+    simulationId: string
+  ): Promise<ApiResponse<{ paused: boolean }>> {
+    return this.request(`/simulation/${simulationId}/pause`, 'POST');
+  }
+
+  // 恢复模拟
+  async resumeSimulation(
+    simulationId: string
+  ): Promise<ApiResponse<{ resumed: boolean }>> {
+    return this.request(`/simulation/${simulationId}/resume`, 'POST');
+  }
+
   // =============== 数据导出 ===============
 
   // 导出模拟结果
@@ -264,10 +278,42 @@ export class RealtimeConnection {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private listeners: Map<string, ((data: unknown) => void)[]> = new Map();
+  private intentionalClose = false;
+
+  private buildWsUrl(): string {
+    const base = new URL(API_CONFIG.BASE_URL);
+    const protocol = base.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${base.host}/ws`;
+  }
 
   connect(): Promise<void> {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return Promise.resolve();
+    }
+
+    if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+      return Promise.resolve();
+    }
+
+    this.intentionalClose = false;
+
     return new Promise((resolve, reject) => {
-      const wsUrl = API_CONFIG.BASE_URL.replace('http', 'ws') + '/ws';
+      const wsUrl = this.buildWsUrl();
+      let settled = false;
+
+      const safeResolve = () => {
+        if (!settled) {
+          settled = true;
+          resolve();
+        }
+      };
+
+      const safeReject = (error: unknown) => {
+        if (!settled) {
+          settled = true;
+          reject(error);
+        }
+      };
       
       try {
         this.ws = new WebSocket(wsUrl);
@@ -275,7 +321,7 @@ export class RealtimeConnection {
         this.ws.onopen = () => {
           console.log('WebSocket connected');
           this.reconnectAttempts = 0;
-          resolve();
+          safeResolve();
         };
 
         this.ws.onmessage = (event) => {
@@ -292,15 +338,18 @@ export class RealtimeConnection {
 
         this.ws.onclose = () => {
           console.log('WebSocket closed');
-          this.attemptReconnect();
+          this.ws = null;
+          if (!this.intentionalClose) {
+            this.attemptReconnect();
+          }
         };
 
         this.ws.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          reject(error);
+          console.warn('WebSocket error:', error);
+          safeReject(new Error(`WebSocket connection failed: ${wsUrl}`));
         };
       } catch (error) {
-        reject(error);
+        safeReject(error);
       }
     });
   }
@@ -342,6 +391,7 @@ export class RealtimeConnection {
   // 断开连接
   disconnect() {
     if (this.ws) {
+      this.intentionalClose = true;
       this.ws.close();
       this.ws = null;
     }

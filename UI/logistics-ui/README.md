@@ -89,6 +89,37 @@ npm run dev
 
 访问 http://localhost:3000 查看应用。
 
+### 对接 Engine 实时后端（新增）
+
+在 UI 目录创建 `.env.local`：
+
+```bash
+NEXT_PUBLIC_USE_ENGINE_BACKEND=1
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+NEXT_PUBLIC_AMAP_KEY=你的高德Web端JSAPI Key
+# 可选（若控制台开启了安全密钥）
+NEXT_PUBLIC_AMAP_SECURITY_CODE=你的高德安全密钥
+# 可选：地图中心和映射范围
+NEXT_PUBLIC_MAP_CENTER_LNG=113.2644
+NEXT_PUBLIC_MAP_CENTER_LAT=23.1291
+NEXT_PUBLIC_MAP_SPAN_DEGREE=0.2
+```
+
+启动 Engine 实时服务（在仓库 `Engine/` 目录）：
+
+```bash
+/opt/miniconda3/envs/test/bin/python -m uvicorn Framework.api.server:app --host 127.0.0.1 --port 8000
+```
+
+再启动 UI：
+
+```bash
+npm run dev
+```
+
+此时主页面会通过 REST + WebSocket 实时接收 Engine 状态。
+当配置 `NEXT_PUBLIC_AMAP_KEY` 后，地图区域会自动切换到“高德底图 + 仿真图层实时叠加”；未配置时自动回退到原 Canvas 视图。
+
 ### 构建生产版本
 
 ```bash

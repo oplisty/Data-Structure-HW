@@ -12,6 +12,7 @@ def load_real_map_from_processed(
     processed_dir: str | Path,
     station_num_piles: int = 2,
     station_charge_rate: float = 6.0,
+    bbox: tuple[float, float, float, float] | None = None,
 ) -> MapBuildResult:
     """Load preprocessed real map data (parquet/json) into framework objects.
 
@@ -45,10 +46,37 @@ def load_real_map_from_processed(
             "Please install parquet engine dependencies: pyarrow or fastparquet."
         ) from exc
 
+    # Optional strict clipping to bbox: (min_lon, min_lat, max_lon, max_lat)
+    if bbox is not None:
+        min_lon, min_lat, max_lon, max_lat = bbox
+        nodes_df = nodes_df[
+            (nodes_df["lon"] >= min_lon)
+            & (nodes_df["lon"] <= max_lon)
+            & (nodes_df["lat"] >= min_lat)
+            & (nodes_df["lat"] <= max_lat)
+        ].copy()
+
+    kept_node_ids = {int(x) for x in nodes_df["node_id"].tolist()}
+    edges_df = edges_df[
+        edges_df["u"].astype("int64").isin(kept_node_ids)
+        & edges_df["v"].astype("int64").isin(kept_node_ids)
+    ].copy()
+
+    # Keep only nodes referenced by surviving edges.
+    if not edges_df.empty:
+        used_node_ids = set(edges_df["u"].astype("int64").tolist()) | set(edges_df["v"].astype("int64").tolist())
+        nodes_df = nodes_df[nodes_df["node_id"].astype("int64").isin(used_node_ids)].copy()
+
+    if nodes_df.empty or edges_df.empty:
+        raise RuntimeError("No nodes/edges left after applying clipping constraints")
+
     graph = Graph()
 
     station_node_ids = set()
     if not stations_df.empty and "node_id" in stations_df.columns:
+        stations_df = stations_df[
+            stations_df["node_id"].astype("int64").isin({int(x) for x in nodes_df["node_id"].tolist()})
+        ].copy()
         station_node_ids = {int(x) for x in stations_df["node_id"].tolist()}
 
     depot_node = None
@@ -58,6 +86,9 @@ def load_real_map_from_processed(
 
     if depot_node is None:
         # fallback: pick first node
+        depot_node = int(nodes_df.iloc[0]["node_id"])
+    elif int(depot_node) not in {int(x) for x in nodes_df["node_id"].tolist()}:
+        # fallback when configured depot gets clipped out
         depot_node = int(nodes_df.iloc[0]["node_id"])
 
     for _, row in nodes_df.iterrows():

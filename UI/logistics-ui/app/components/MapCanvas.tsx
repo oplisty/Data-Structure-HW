@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { SimulationState } from '../types';
+import AMapRealtimeMap from './AMapRealtimeMap';
 
 interface MapCanvasProps {
   state: SimulationState;
@@ -11,7 +12,7 @@ interface MapCanvasProps {
   selectedVehicleId?: string;
 }
 
-const MapCanvas: React.FC<MapCanvasProps> = ({
+const CanvasMapFallback: React.FC<MapCanvasProps> = ({
   state,
   width = 800,
   height = 600,
@@ -565,6 +566,38 @@ const MapCanvas: React.FC<MapCanvasProps> = ({
         </div>
       )}
     </div>
+  );
+};
+
+const MapCanvas: React.FC<MapCanvasProps> = ({
+  state,
+  width = 800,
+  height = 600,
+  onNodeClick,
+  selectedVehicleId
+}) => {
+  const enableAmap = Boolean(process.env.NEXT_PUBLIC_AMAP_KEY);
+
+  if (enableAmap) {
+    return (
+      <AMapRealtimeMap
+        state={state}
+        width={width}
+        height={height}
+        onNodeClick={onNodeClick}
+        selectedVehicleId={selectedVehicleId}
+      />
+    );
+  }
+
+  return (
+    <CanvasMapFallback
+      state={state}
+      width={width}
+      height={height}
+      onNodeClick={onNodeClick}
+      selectedVehicleId={selectedVehicleId}
+    />
   );
 };
 
