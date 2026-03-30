@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
+
+# 添加搜索路径，支持从不同目录运行脚本
+# 添加搜索路径，支持从不同目录运行脚本
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from Framework.core import Environment, ScenarioConfig, SimulationConfig, Vehicle
 from Framework.examples.yaml_config import parse_args_with_yaml
