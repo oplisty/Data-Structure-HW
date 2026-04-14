@@ -1,0 +1,176 @@
+\section{Introduction}
+\label{sec:intro}
+
+With the rapid development of e-commerce, on-demand local delivery, and smart logistics, urban delivery systems are facing stricter timeliness requirements and more complex operational constraints. Compared with traditional fuel vehicles, new energy logistics vehicles offer advantages such as lower emissions, higher energy efficiency, and policy support, and are becoming an important part of urban delivery. However, they also introduce new challenges, including limited battery capacity, time-consuming charging, and limited charging-station resources with possible congestion, which make vehicle routing and task scheduling more difficult.
+
+In real logistics scenarios, delivery tasks are usually not fully known in advance but arrive dynamically over time. Under constraints such as limited fleet size, vehicle load limits, continuous battery consumption, task deadlines, and charging-station queues, managers must decide in real time which vehicle should serve which task, how to plan routes, when to charge, and whether multiple vehicles should collaborate on the same task. Therefore, this is not simply a shortest-path problem, but a comprehensive problem involving graph search, resource-constrained scheduling, dynamic decision-making, and system simulation. Based on this background, we aim to design and implement a complete system platform to simulate and analyze the performance of different scheduling strategies in new energy logistics scenarios.
+\subsection{Dynamic Modeling of Vehicles and Tasks}
+
+In this project, vehicles, tasks, depots, and charging stations are modeled in a unified way at the entity level. Each vehicle includes attributes such as current location, battery level, battery capacity, maximum load capacity, current load, speed, and energy consumption per unit distance. Each task includes information such as release time, deadline, task location, cargo weight, and status. During the simulation, tasks are released dynamically as time progresses, rather than being provided to the scheduler all at once, so that the system can better reflect the online decision-making process in real delivery scenarios.
+
+\subsection{Graph-Based Road Network and Path Planning}
+
+This project uses graphs as the core data structure and models the road network as a weighted graph, where nodes represent road intersections, depots, task points, and charging stations, and edges represent road connections together with their distance or travel cost. For path planning, the system implements Dijkstra’s algorithm as a stable and reliable shortest-path baseline, while A* is introduced to improve goal-directed search efficiency. RRT is also included as an extended experimental algorithm to demonstrate the scalability of the system in path planning. With these algorithms, the system can support shortest-path queries, reachability checking, return-to-depot feasibility checking, and nearest charging station search.
+
+\subsection{Reward and Charging Constraints}
+This project implements a task reward calculation and overdue penalty mechanism in the simulation environment, and models each charging station as a resource node with a fixed number of chargers, occupancy status, and a waiting queue. The system not only checks whether a vehicle can complete a task and return to the depot, but also automatically triggers charging-station selection when the battery level is low. In station selection, it considers not only distance, but also queue length and station occupancy, so as to better reflect the practical complexity of new energy logistics delivery.
+%-------------------------------------------------------------------------
+\subsection{Scheduling, Experiments, and Visualization}
+This project implements several heuristic scheduling strategies, including nearest-task-first, maximum-weight-first, and earliest-deadline-first, and supports different scenario settings such as small-scale, medium-scale, and large-scale cases. In addition, the project further explores the use of Q-learning for dynamic scheduling decisions and builds an offline MILP module to solve global plans for small-scale scenarios. Based on these components, the project also provides real-time visualization of the map, tasks, vehicles, charging stations, and statistical indicators through a web frontend, so that the system can be used not only for simulation but also for demonstration and result analysis.
+\subsection{Summary}
+
+\subsection{Mathematics}
+
+Please, number all of your sections and displayed equations as in these examples:
+\begin{equation}
+  E = m\cdot c^2
+  \label{eq:important}
+\end{equation}
+and
+\begin{equation}
+  v = a\cdot t.
+  \label{eq:also-important}
+\end{equation}
+It is important for the reader to be able to refer to any particular equation.
+Just because you did not refer to it in the text does not mean that some future reader might not need to refer to it.
+It is cumbersome to have to use circumlocutions like ``the equation second from the top of page 3 column 1''.
+(Note that the ruler will not be present in the final copy, so is not an alternative to equation numbers).
+All authors will benefit from reading Mermin's description of how to write mathematics:
+\url{http://www.pamitc.org/documents/mermin.pdf}.
+
+\subsection{Blind review}
+
+Many authors misunderstand the concept of anonymizing for blind review.
+Blind review does not mean that one must remove citations to one's own work---in fact it is often impossible to review a paper unless the previous citations are known and available.
+
+Blind review means that you do not use the words ``my'' or ``our'' when citing previous work.
+That is all.
+(But see below for tech reports.)
+
+Saying ``this builds on the work of Lucy Smith [1]'' does not mean that you are Lucy Smith;
+it says that you are building on her work.
+If you are Smith and Jones, do not say ``as we show in [7]'', say ``as Smith and Jones show in [7]'' and at the end of the paper, include reference 7 as you would any other cited work.
+
+An example of a bad paper just asking to be rejected:
+\begin{quote}
+\begin{center}
+    An analysis of the frobnicatable foo filter.
+\end{center}
+
+   In this paper, we present a performance analysis of our previous paper [1], and show that it is inferior to all previously known methods.
+   Why the previous paper was accepted without this analysis is beyond me.
+
+   [1] Removed for blind review
+\end{quote}
+
+
+An example of an acceptable paper:
+\begin{quote}
+\begin{center}
+     An analysis of the frobnicatable foo filter.
+\end{center}
+
+   In this paper, we present a performance analysis of the paper of Smith \etal [1], and show it to be inferior to all previously known methods.
+   Why the previous paper was accepted without this analysis is beyond me.
+
+   [1] Smith, L and Jones, C. ``The frobnicatable foo filter, a fundamental contribution to human knowledge''. Nature 381(12), 1-213.
+\end{quote}
+
+If you are making a submission to another conference at the same time that covers similar or overlapping material, you may need to refer to that submission to explain the differences, just as you would if you had previously published related work.
+In such cases, include the anonymized parallel submission~\cite{Authors14} as supplemental material and cite it as
+\begin{quote}
+[1] Authors. ``The frobnicatable foo filter'', F\&G 2014 Submission ID 324, Supplied as supplemental material {\tt fg324.pdf}.
+\end{quote}
+
+Finally, you may feel you need to tell the reader that more details can be found elsewhere and refer them to a technical report.
+For conference submissions, the paper must stand on its own, and not {\em require} the reviewer to go to a tech report for further details.
+Thus, you may say in the body of the paper ``further details may be found in~\cite{Authors14b}''.
+Then submit the tech report as supplemental material.
+Again, do not assume that the reviewers will read this material.
+
+Sometimes your paper is about a problem that you tested using a tool that is widely known to be restricted to a single institution.
+For example, let's say it's 1969, you have solved a key problem on the Apollo lander, and you believe that the 1970 audience would like to hear about your
+solution.
+The work is a development of your celebrated 1968 paper entitled ``Zero-g frobnication: How being the only people in the world with access to the Apollo lander source code makes us a wow at parties'', by Zeus \etal.
+
+You can handle this paper like any other.
+Do not write ``We show how to improve our previous work [Anonymous, 1968].
+This time we tested the algorithm on a lunar lander [name of lander removed for blind review]''.
+That would be silly, and would immediately identify the authors.
+Instead write the following:
+\begin{quotation}
+\noindent
+   We describe a system for zero-g frobnication.
+   This system is new because it handles the following cases:
+   A, B.  Previous systems [Zeus et al. 1968] did not  handle case B properly.
+   Ours handles it by including a foo term in the bar integral.
+
+   ...
+
+   The proposed system was integrated with the Apollo lunar lander, and went all the way to the moon, don't you know.
+   It displayed the following behaviours, which show how well we solved cases A and B: ...
+\end{quotation}
+As you can see, the above text follows standard scientific convention, reads better than the first version, and does not explicitly name you as the authors.
+A reviewer might think that it is likely that the new article was written by Zeus \etal, but cannot make any decision based on that guess.
+He or she would have to be sure that no other authors could have been contracted to solve problem B.
+\medskip
+
+\noindent
+FAQ\medskip\\
+{\bf Q:} Are acknowledgements OK?\\
+{\bf A:} No.  Leave them for the final copy.\medskip\\
+{\bf Q:} How do I cite my results reported in open challenges?
+{\bf A:} To conform with the double-blind review policy, you can report results of other challenge participants together with your results in your paper.
+However, for your results, you should not identify yourself and should not mention your participation in the challenge.
+Instead, present your results referring to the method proposed in your paper and draw conclusions based on the experimental comparison with other results.\medskip\\
+
+\begin{figure}[t]
+  \centering
+  \fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
+   %\includegraphics[width=0.8\linewidth]{egfigure.eps}
+
+   \caption{Example of caption.
+   It is set in Roman so that mathematics (always set in Roman: $B \sin A = A \sin B$) may be included without an ugly clash.}
+   \label{fig:onecol}
+\end{figure}
+
+\subsection{Miscellaneous}
+
+\noindent
+Compare the following:\\
+\begin{tabular}{ll}
+ \verb'$conf_a$' &  $conf_a$ \\
+ \verb'$\mathit{conf}_a$' & $\mathit{conf}_a$
+\end{tabular}\\
+See The \TeX book, p165.
+
+The space after \eg, meaning ``for example'', should not be a sentence-ending space.
+So \eg is correct, {\em e.g.} is not.
+The provided \verb'\eg' macro takes care of this.
+
+When citing a multi-author paper, you may save space by using ``et alia'', shortened to ``\etal'' (not ``{\em et.\ al.}'' as ``{\em et}'' is a complete word).
+If you use the \verb'\etal' macro provided, then you need not worry about double periods when used at the end of a sentence as in Alpher \etal.
+However, use it only when there are three or more authors.
+Thus, the following is correct:
+   ``Frobnication has been trendy lately.
+   It was introduced by Alpher~\cite{Alpher02}, and subsequently developed by
+   Alpher and Fotheringham-Smythe~\cite{Alpher03}, and Alpher \etal~\cite{Alpher04}.''
+
+This is incorrect: ``... subsequently developed by Alpher \etal~\cite{Alpher03} ...'' because reference~\cite{Alpher03} has only two authors.
+
+\begin{figure*}
+  \centering
+  \begin{subfigure}{0.68\linewidth}
+    \fbox{\rule{0pt}{2in} \rule{.9\linewidth}{0pt}}
+    \caption{An example of a subfigure.}
+    \label{fig:short-a}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.28\linewidth}
+    \fbox{\rule{0pt}{2in} \rule{.9\linewidth}{0pt}}
+    \caption{Another example of a subfigure.}
+    \label{fig:short-b}
+  \end{subfigure}
+  \caption{Example of a short caption, which should be centered.}
+  \label{fig:short}
+\end{figure*}
