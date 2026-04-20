@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -81,7 +82,7 @@ function loadAMapScript(apiKey: string, securityCode?: string): Promise<void> {
 
     const script = document.createElement('script');
     script.id = 'amap-jsapi-loader';
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(apiKey)}&plugin=AMap.Scale,AMap.ToolBar`;
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(apiKey)}&plugin=AMap.Scale,AMap.ToolBar,AMap.MoveAnimation`;
     script.async = true;
 
     script.onload = () => resolve();
@@ -170,6 +171,30 @@ function buildProjection(state: SimulationState, center: LngLat, spanDegree: num
   return { toLngLat, bboxPoints };
 }
 
+
+
+function getLngLatDistanceMeters(a: LngLat, b: LngLat): number {
+  const earthRadius = 6371000;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b[1] - a[1]);
+  const dLng = toRad(b[0] - a[0]);
+  const lat1 = toRad(a[1]);
+  const lat2 = toRad(b[1]);
+  const sinDLat = Math.sin(dLat / 2);
+  const sinDLng = Math.sin(dLng / 2);
+  const x = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLng * sinDLng;
+  const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  return earthRadius * c;
+}
+
+function getPathLengthMeters(points: LngLat[]): number {
+  let total = 0;
+  for (let i = 1; i < points.length; i++) {
+    total += getLngLatDistanceMeters(points[i - 1], points[i]);
+  }
+  return total;
+}
+
 const AMapRealtimeMap: React.FC<AMapRealtimeMapProps> = ({
   state,
   width = 800,
@@ -182,8 +207,25 @@ const AMapRealtimeMap: React.FC<AMapRealtimeMapProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<AMapInstance | null>(null);
-  const overlaysRef = useRef<AMapOverlay[]>([]);
+  const overlaysRef = useRef<{
+    roads: AMapOverlay[];
+    nodes: AMapOverlay[];
+    vehicles: Record<string, any>;
+    routes: Record<string, AMapOverlay>;
+    labels: Record<string, AMapOverlay>;
+    tasks: Record<string, AMapOverlay>;
+  }>({
+    roads: [],
+    nodes: [],
+    vehicles: {},
+    routes: {},
+    labels: {},
+    tasks: {}
+  });
+
   const hasFitViewRef = useRef(false);
+  const prevGraphNodesCountRef = useRef(0);
+  const prevGraphEdgesCountRef = useRef(0);
 
   const [loadStatus, setLoadStatus] = useState<'loading' | 'ready' | 'error'>(
     apiKey ? 'loading' : 'error'
@@ -274,12 +316,14 @@ const AMapRealtimeMap: React.FC<AMapRealtimeMapProps> = ({
     mapRef.current = map;
 
     return () => {
-      overlaysRef.current.forEach((overlay) => {
-        if (overlay?.setMap) {
-          overlay.setMap(null);
-        }
-      });
-      overlaysRef.current = [];
+      /* 清理旧组件逻辑更新 */
+      Object.keys(overlaysRef.current.vehicles).forEach(k => overlaysRef.current.vehicles[k]?.setMap?.(null));
+      Object.keys(overlaysRef.current.routes).forEach(k => overlaysRef.current.routes[k]?.setMap?.(null));
+      Object.keys(overlaysRef.current.labels).forEach(k => overlaysRef.current.labels[k]?.setMap?.(null));
+      Object.keys(overlaysRef.current.tasks).forEach(k => overlaysRef.current.tasks[k]?.setMap?.(null));
+      overlaysRef.current.roads.forEach((o) => o?.setMap?.(null));
+      overlaysRef.current.nodes.forEach((o) => o?.setMap?.(null));
+      overlaysRef.current = { roads: [], nodes: [], vehicles: {}, routes: {}, labels: {}, tasks: {} };
       hasFitViewRef.current = false;
 
       if (mapRef.current) {
@@ -292,95 +336,116 @@ const AMapRealtimeMap: React.FC<AMapRealtimeMapProps> = ({
   useEffect(() => {
     const map = mapRef.current;
     const AMap = (window as AMapWindow).AMap;
-    if (!map || !AMap) return;
-
-    overlaysRef.current.forEach((overlay) => {
-      if (overlay?.setMap) {
-        overlay.setMap(null);
-      }
-    });
-    overlaysRef.current = [];
+    if (!map || !AMap || !state || !state.graph) return;
 
     const projection = buildProjection(state, center, spanDegree);
-    const overlays: AMapOverlay[] = [];
 
-    // 道路
-    if (showRoadSegments) {
-      const allEdges = Array.from(state.graph.edges.values()).flat();
-      const edgeStep = Math.max(1, Math.ceil(allEdges.length / maxRoadSegments));
-      const edgeDedup = new Set<string>();
+    // 检查地图基础结构是否改变，如果变了就重新绘制地图底图
+    const nodesCount = state.graph.nodes.size;
+    const edgesCount = state.graph.edges.size;
+    const graphChanged = nodesCount !== prevGraphNodesCountRef.current || edgesCount !== prevGraphEdgesCountRef.current;
 
-      for (let edgeIndex = 0; edgeIndex < allEdges.length; edgeIndex += edgeStep) {
-        const edge = allEdges[edgeIndex];
-        const edgeKey = [edge.from, edge.to].sort().join('-');
-        if (edgeDedup.has(edgeKey)) continue;
-        edgeDedup.add(edgeKey);
+    if (graphChanged) {
+      // 销毁旧的路网节点
+      overlaysRef.current.roads.forEach(o => o?.setMap?.(null));
+      overlaysRef.current.nodes.forEach(o => o?.setMap?.(null));
+      overlaysRef.current.roads = [];
+      overlaysRef.current.nodes = [];
 
-        const fromNode = state.graph.nodes.get(edge.from);
-        const toNode = state.graph.nodes.get(edge.to);
-        if (!fromNode || !toNode) continue;
+      // 绘制道路
+      if (showRoadSegments) {
+        const allEdges = Array.from(state.graph.edges.values()).flat();
+        const edgeStep = Math.max(1, Math.ceil(allEdges.length / maxRoadSegments));
+        const edgeDedup = new Set<string>();
 
-        const line = new AMap.Polyline({
-          path: [
-            projection.toLngLat(fromNode.position.x, fromNode.position.y),
-            projection.toLngLat(toNode.position.x, toNode.position.y),
-          ],
-          strokeColor: edge.trafficFactor > 1.1 ? '#ef4444' : '#64748b',
-          strokeWeight: edge.trafficFactor > 1.1 ? 4 : 2,
-          strokeStyle: edge.trafficFactor > 1.1 ? 'dashed' : 'solid',
-          strokeOpacity: 0.9,
+        const newRoads = [];
+        for (let edgeIndex = 0; edgeIndex < allEdges.length; edgeIndex += edgeStep) {
+          const edge = allEdges[edgeIndex];
+          const edgeKey = [edge.from, edge.to].sort().join('-');
+          if (edgeDedup.has(edgeKey)) continue;
+          edgeDedup.add(edgeKey);
+
+          const fromNode = state.graph.nodes.get(edge.from);
+          const toNode = state.graph.nodes.get(edge.to);
+          if (!fromNode || !toNode) continue;
+
+          const line = new AMap.Polyline({
+            path: [
+              projection.toLngLat(fromNode.position.x, fromNode.position.y),
+              projection.toLngLat(toNode.position.x, toNode.position.y),
+            ],
+            strokeColor: edge.trafficFactor > 1.1 ? '#ef4444' : '#64748b',
+            strokeWeight: edge.trafficFactor > 1.1 ? 4 : 2,
+            strokeStyle: edge.trafficFactor > 1.1 ? 'dashed' : 'solid',
+            strokeOpacity: 0.9,
+          });
+
+          line.setMap(map);
+          newRoads.push(line);
+        }
+        overlaysRef.current.roads = newRoads;
+      }
+
+      // 节点
+      const allNodes = Array.from(state.graph.nodes.values());
+      const nodeStep = Math.max(1, Math.ceil(allNodes.length / maxNodeMarkers));
+
+      const newNodes = [];
+      for (let nodeIndex = 0; nodeIndex < allNodes.length; nodeIndex += nodeStep) {
+        const node = allNodes[nodeIndex];
+
+        if (!showRoadNodeMarkers && node.type !== 'warehouse' && node.type !== 'charging_station') {
+          continue;
+        }
+
+        const centerPoint = projection.toLngLat(node.position.x, node.position.y);
+
+        let color = '#6b7280';
+        let radius = 4;
+        if (node.type === 'warehouse') {
+          color = '#3b82f6';
+          radius = 8;
+        } else if (node.type === 'charging_station') {
+          color = '#10b981';
+          radius = 7;
+        }
+
+        const marker = new AMap.CircleMarker({
+          center: centerPoint,
+          radius,
+          fillColor: color,
+          fillOpacity: 0.95,
+          strokeColor: '#0f172a',
+          strokeWeight: 1,
+          bubble: true,
         });
 
-        line.setMap(map);
-        overlays.push(line);
+        marker.setMap(map);
+        if (onNodeClick && marker.on) {
+          marker.on('click', () => onNodeClick(node.id));
+        }
+        newNodes.push(marker);
       }
+      overlaysRef.current.nodes = newNodes;
+
+      prevGraphNodesCountRef.current = nodesCount;
+      prevGraphEdgesCountRef.current = edgesCount;
     }
 
-    // 节点
-    const allNodes = Array.from(state.graph.nodes.values());
-    const nodeStep = Math.max(1, Math.ceil(allNodes.length / maxNodeMarkers));
-
-    for (let nodeIndex = 0; nodeIndex < allNodes.length; nodeIndex += nodeStep) {
-      const node = allNodes[nodeIndex];
-
-      // Hide dense road-node dots by default to keep vehicles and tasks visible.
-      if (!showRoadNodeMarkers && node.type !== 'warehouse' && node.type !== 'charging_station') {
-        continue;
-      }
-
-      const centerPoint = projection.toLngLat(node.position.x, node.position.y);
-
-      let color = '#6b7280';
-      let radius = 4;
-      if (node.type === 'warehouse') {
-        color = '#3b82f6';
-        radius = 8;
-      } else if (node.type === 'charging_station') {
-        color = '#10b981';
-        radius = 7;
-      }
-
-      const marker = new AMap.CircleMarker({
-        center: centerPoint,
-        radius,
-        fillColor: color,
-        fillOpacity: 0.95,
-        strokeColor: '#0f172a',
-        strokeWeight: 1,
-        bubble: true,
-      });
-
-      marker.setMap(map);
-      if (onNodeClick && marker.on) {
-        marker.on('click', () => onNodeClick(node.id));
-      }
-      overlays.push(marker);
-    }
-
-    // 任务
+    // 动态绘制：任务
     const activeTasks = state.tasks.filter((task) =>
       task.status === 'pending' || task.status === 'assigned' || task.status === 'in_progress'
     );
+
+    const currentTaskIds = new Set(activeTasks.map(t => t.id));
+    
+    // 清理已完成/过期的任务标记
+    Object.keys(overlaysRef.current.tasks).forEach(taskId => {
+      if (!currentTaskIds.has(taskId)) {
+        overlaysRef.current.tasks[taskId]?.setMap?.(null);
+        delete overlaysRef.current.tasks[taskId];
+      }
+    });
 
     for (const task of activeTasks) {
       const point = projection.toLngLat(task.position.x, task.position.y);
@@ -392,76 +457,186 @@ const AMapRealtimeMap: React.FC<AMapRealtimeMapProps> = ({
       else if (task.priority === 'medium') color = '#3b82f6';
       else if (task.priority === 'low') color = '#10b981';
 
-      const marker = new AMap.CircleMarker({
-        center: point,
-        radius: 6,
-        fillColor: color,
-        fillOpacity: isPending ? 0.95 : 0.45,
-        strokeColor: '#111827',
-        strokeWeight: 1,
-      });
-      marker.setMap(map);
-      overlays.push(marker);
+      if (overlaysRef.current.tasks[task.id]) {
+        // 更新已有任务
+        const m = overlaysRef.current.tasks[task.id] as any;
+        m.setCenter(point);
+        m.setOptions({ fillColor: color, fillOpacity: isPending ? 0.95 : 0.45 });
+      } else {
+        // 新建任务
+        const marker = new AMap.CircleMarker({
+          center: point,
+          radius: 6,
+          fillColor: color,
+          fillOpacity: isPending ? 0.95 : 0.45,
+          strokeColor: '#111827',
+          strokeWeight: 1,
+        });
+        marker.setMap(map);
+        overlaysRef.current.tasks[task.id] = marker;
+      }
     }
 
-    // 车辆 + 车辆路径
+    // 动态绘制：车辆 + 车辆路径
+    const currentVehicleIds = new Set(state.vehicles.map(v => v.id));
+    Object.keys(overlaysRef.current.vehicles).forEach(vid => {
+      if (!currentVehicleIds.has(vid)) {
+        overlaysRef.current.vehicles[vid]?.setMap?.(null);
+        overlaysRef.current.routes[vid]?.setMap?.(null);
+        overlaysRef.current.labels[vid]?.setMap?.(null);
+        delete overlaysRef.current.vehicles[vid];
+        delete overlaysRef.current.routes[vid];
+        delete overlaysRef.current.labels[vid];
+      }
+    });
+
     for (const vehicle of state.vehicles) {
       const vehiclePoint = projection.toLngLat(vehicle.position.x, vehicle.position.y);
 
-      if (vehicle.path.length > 0 && (vehicle.status === 'delivering' || vehicle.status === 'returning')) {
-        const pathPoints: LngLat[] = [vehiclePoint];
-        for (const nodeId of vehicle.path) {
-          const node = state.graph.nodes.get(nodeId);
-          if (node) {
-            pathPoints.push(projection.toLngLat(node.position.x, node.position.y));
-          }
+      // --- 计算包含平滑插值的完整节点序列，供车辆动画和路线复用 ---
+      const m = overlaysRef.current.vehicles[vehicle.id];
+      const prevData = m?.getExtData?.() || {};
+      const prevPath = prevData.path || [];
+      const currentPathSet = new Set(vehicle.path);
+      const passedNodes = prevPath.filter((nodeId: string) => !currentPathSet.has(nodeId));
+
+      let markerPos: LngLat | null = null;
+      if (m && typeof m.getPosition === 'function') {
+        const pos = m.getPosition();
+        if (pos && typeof pos.getLng === 'function') {
+          markerPos = [pos.getLng(), pos.getLat()] as LngLat;
         }
-
-        const route = new AMap.Polyline({
-          path: pathPoints,
-          strokeColor: vehicle.color,
-          strokeWeight: 3,
-          strokeOpacity: 0.45,
-          strokeStyle: 'dashed',
-        });
-
-        route.setMap(map);
-        overlays.push(route);
       }
 
-      const vehicleMarker = new AMap.CircleMarker({
-        center: vehiclePoint,
-        radius: selectedVehicleId === vehicle.id ? 14 : 10,
-        fillColor: vehicle.color,
-        fillOpacity: 0.95,
-        strokeColor: selectedVehicleId === vehicle.id ? '#f59e0b' : '#ffffff',
-        strokeWeight: selectedVehicleId === vehicle.id ? 3 : 2,
-        zIndex: 120,
-      });
+      // 为了不让路线突然消失，需要包含车子当前「实际上正在经过的」节点
+      const pathFromCurrentToBackend: LngLat[] = [];
+      if (markerPos) {
+        pathFromCurrentToBackend.push(markerPos);
+      } else {
+        pathFromCurrentToBackend.push(vehiclePoint);
+      }
 
-      vehicleMarker.setMap(map);
-      overlays.push(vehicleMarker);
+      for (const nodeId of passedNodes) {
+        const node = state.graph.nodes.get(nodeId);
+        if (node) {
+          pathFromCurrentToBackend.push(projection.toLngLat(node.position.x, node.position.y));
+        }
+      }
+      pathFromCurrentToBackend.push(vehiclePoint);
 
-      const label = new AMap.Text({
-        text: vehicle.name,
-        position: vehiclePoint,
-        offset: new AMap.Pixel(0, -18),
-        style: {
-          color: '#0f172a',
-          fontSize: '11px',
-          fontWeight: '700',
-          padding: '1px 4px',
-          backgroundColor: '#ffffffcc',
-          border: '1px solid #94a3b8',
-          borderRadius: '8px',
-        },
-      });
+      // 车辆单次行程动画的轨迹数组（去重）
+      const animPath: LngLat[] = [pathFromCurrentToBackend[0]];
+      for (let i = 1; i < pathFromCurrentToBackend.length; i++) {
+        const last = animPath[animPath.length - 1];
+        const pt = pathFromCurrentToBackend[i];
+        if (Math.abs(pt[0] - last[0]) > 0.000001 || Math.abs(pt[1] - last[1]) > 0.000001) {
+          animPath.push(pt);
+        }
+      }
 
-      label.setMap(map);
-      overlays.push(label);
+      // 将后端的剩余路径（vehicle.path）拼接到后续路线中以绘制完整的线图
+      const fullRoutePoints: LngLat[] = [...animPath];
+      for (const nodeId of vehicle.path) {
+        const node = state.graph.nodes.get(nodeId);
+        if (node) {
+          fullRoutePoints.push(projection.toLngLat(node.position.x, node.position.y));
+        }
+      }
+
+      // 更新导航线
+      if (fullRoutePoints.length > 1 && vehicle.status !== 'idle') {
+        if (overlaysRef.current.routes[vehicle.id]) {
+          (overlaysRef.current.routes[vehicle.id] as any).setPath(fullRoutePoints);
+          (overlaysRef.current.routes[vehicle.id] as any).setMap(map);
+        } else {
+          const route = new (AMap as any).Polyline({
+            path: fullRoutePoints,
+            strokeColor: vehicle.color,
+            strokeWeight: 3,
+            strokeOpacity: 0.8,
+            strokeStyle: 'dashed',
+            lineJoin: 'round',
+          });
+          route.setMap(map);
+          overlaysRef.current.routes[vehicle.id] = route;
+        }
+      } else {
+        if (overlaysRef.current.routes[vehicle.id]) {
+          overlaysRef.current.routes[vehicle.id].setMap(null);
+        }
+      }
+
+      const size = selectedVehicleId === vehicle.id ? 28 : 20;
+      const border = selectedVehicleId === vehicle.id ? '#f59e0b' : '#ffffff';
+      // 移除整体的 translate 平移，将圆点置于容器的左上角 (0,0) 并用 Pixel(offset) 完全校准中心点！
+      const contentStr = `
+        <div style="position:relative; width:${size}px; height:${size}px; pointer-events:none; transition:all 0.3s;">
+          <div style="position:absolute; bottom:${size + 4}px; left:50%; transform:translateX(-50%); color:#0f172a; font-size:11px; font-weight:700; padding:1px 4px; background-color:#ffffffcc; border:1px solid #94a3b8; border-radius:8px; white-space:nowrap;">
+            ${vehicle.name}
+          </div>
+          <div style="width:${size}px; height:${size}px; background-color:${vehicle.color}; border-radius:50%; border:${selectedVehicleId === vehicle.id ? 3 : 2}px solid ${border}; box-shadow:0 0 5px rgba(0,0,0,0.5); box-sizing:border-box; transition:all 0.3s;"></div>
+        </div>
+      `;
+      const currentContentProps = `${vehicle.name}-${vehicle.color}-${selectedVehicleId === vehicle.id}`;
+      const nowTime = Date.now();
+
+      // 更新车辆 Marker
+      if (m) {
+        const prevTime = prevData.time || nowTime;
+        const dt = Math.max(nowTime - prevTime, 100);
+        const tickDurationMs = Math.min(Math.max(dt, 100), 2000); // Usually 250~1000ms
+        
+        if (typeof m.stopMove === 'function') {
+          m.stopMove();
+        }
+
+        if (animPath.length > 1) {
+           const distMeters = getPathLengthMeters(animPath);
+           const distKm = distMeters / 1000;
+           // Extend expected time by 15% to smooth network jitter, avoiding full stops
+           const hours = (tickDurationMs * 1.15) / 3600000; 
+           const kmph = hours > 0 ? (distKm / hours) : 0;
+           
+           if (kmph > 0 && typeof m.moveAlong === 'function' && animPath.length > 2) {
+             m.moveAlong(animPath, { speed: kmph, autoRotation: false });
+           } else if (kmph > 0 && typeof m.moveTo === 'function') {
+             m.moveTo(animPath[1], { speed: kmph, autoRotation: false });
+           } else {
+             m.setPosition(vehiclePoint);
+           }
+        } else {
+           m.setPosition(vehiclePoint);
+        }
+
+        if (currentContentProps !== prevData.contentProps) {
+          m.setContent(contentStr);
+          // 尺寸如果有变，需要动态调整 Offset 回准中心
+          m.setOffset(new (AMap as any).Pixel(-size/2, -size/2));
+        }
+        
+        if (m.setExtData) {
+          m.setExtData({ contentProps: currentContentProps, status: vehicle.status, path: [...vehicle.path], time: nowTime });
+        }
+      } else {
+        const marker = new (AMap as any).Marker({
+          position: vehiclePoint,
+          content: contentStr,
+          offset: new (AMap as any).Pixel(-size/2, -size/2), // 完美居中圆点
+          zIndex: 120,
+          extData: { 
+            contentProps: currentContentProps,
+            status: vehicle.status,
+            path: [...vehicle.path],
+            time: nowTime
+          },
+        });
+
+        marker.setMap(map);
+        overlaysRef.current.vehicles[vehicle.id] = marker;
+      }
+
+      // 车辆标签逻辑合并入车体Marker内，此处不再独立生成标签
     }
-
-    overlaysRef.current = overlays;
 
     if (!hasFitViewRef.current && projection.bboxPoints.length > 1) {
       const boundsMask = projection.bboxPoints.map((point): AMapOverlay =>

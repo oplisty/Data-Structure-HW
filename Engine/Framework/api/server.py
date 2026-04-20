@@ -994,7 +994,10 @@ def _build_ui_state(session: SimulationSession) -> dict[str, Any]:
             u_node = env.graph.nodes[u]
             v_node = env.graph.nodes[v]
             edge_dist = env.graph.edge_distance(u, v) or 1e-9
-            progress = 1.0 - (vehicle.distance_to_next / edge_dist)
+            if vehicle.distance_to_next <= 1e-9:
+                progress = 0.0
+            else:
+                progress = 1.0 - (vehicle.distance_to_next / edge_dist)
             progress = max(0.0, min(1.0, progress))
             v_x = u_node.x + (v_node.x - u_node.x) * progress
             v_y = u_node.y + (v_node.y - u_node.y) * progress

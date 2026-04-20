@@ -48,6 +48,7 @@ export default function ComparePage() {
       engine.initialize({
         scale: selectedScale,
         strategy,
+        chargingStrategy: 'optimal_station', // 默认增加 chargingStrategy 参数
         simulationSpeed: 100, // 快速模拟
         maxSimulationTime: 240, // 4小时模拟
         enableCollaboration: strategy === 'collaborative'

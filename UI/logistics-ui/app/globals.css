@@ -438,3 +438,8 @@ body {
     transform: translateX(100%) rotate(30deg);
   }
 }
+
+/* AMap smooth marker transitions - Disabled because it conflicts with AMap JS MoveAnimation */
+.amap-marker {
+  will-change: transform;
+}
