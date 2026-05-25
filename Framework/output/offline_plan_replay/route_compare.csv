@@ -1,0 +1,20 @@
+vehicle_id,record_type,seq,semantic_node,graph_node_id,engine_node_id,segment_from,segment_to
+0,semantic_stop,0,DEPOT_START,0,,,
+0,semantic_stop,1,T_2,5,,,
+0,semantic_stop,2,T_1,5,,,
+0,semantic_stop,3,T_3,7,,,
+0,semantic_stop,4,DEPOT_END,0,,,
+0,engine_node,0,,0,0,,
+0,engine_node,1,,4,4,,
+0,engine_node,2,,5,5,,
+0,engine_node,3,,23,23,,
+0,engine_node,4,,20,20,,
+0,engine_node,5,,27,27,,
+0,engine_node,6,,7,7,,
+0,engine_node,7,,0,0,,
+0,engine_segment,0,,,"[0, 4, 5]",DEPOT_START,T_2
+0,engine_segment,1,,,[5],T_2,T_1
+0,engine_segment,2,,,"[5, 23, 20, 27, 7]",T_1,T_3
+0,engine_segment,3,,,"[7, 0]",T_3,DEPOT_END
+1,semantic_stop,0,DEPOT_START,0,,,
+1,engine_node,0,,0,0,,

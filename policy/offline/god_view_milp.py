@@ -444,23 +444,59 @@ class GodViewMILP:
 
 
 def build_tiny_demo_instance() -> OfflineInstance:
-    tasks = [
-        Task(id=1, x=8, y=3, demand=18, release=0, deadline=60),
-        Task(id=2, x=14, y=7, demand=22, release=5, deadline=85),
-        Task(id=3, x=6, y=12, demand=15, release=0, deadline=70),
-        Task(id=4, x=18, y=14, demand=20, release=10, deadline=95),
-    ]
-    stations = [
-        Station(id=1, x=10, y=8),
-        Station(id=2, x=16, y=4),
-    ]
+    import sys
+    from pathlib import Path
+    
+    # 把 Engine 目录加入环境变量以导入框架的实体和算法
+    engine_path = Path(__file__).resolve().parent.parent.parent / "Engine"
+    if str(engine_path) not in sys.path:
+        sys.path.append(str(engine_path))
+        
+    from Framework.examples.run_baseline import build_environment
+    from Framework.examples.run_offline_plan_replay import remap_environment_to_offline_task_ids
+
+    # 1. 模拟生成一个小规模环境（保持随机种子固定）
+    env = build_environment(
+        scale="small",
+        scheduler_name="nearest",
+        collaborative_task_ratio=0.0,
+        enable_collaborative_tasks=False,
+        auto_collaborative_dispatch=False,
+    )
+    remap_environment_to_offline_task_ids(env)
+    
+    # 2. 从真实的地图任务中，提取前 5 个作为上帝视角求解的任务子集（避开 Gurobi 2000 个变量/约束的社区版限制）
+    subset_tasks = {k: v for k, v in env.tasks.items() if k <= 5}
+    
+    tasks = []
+    for t in subset_tasks.values():
+        node = env.graph.nodes[t.origin_node]
+        tasks.append(
+            Task(
+                id=t.id,
+                x=node.x / 1000.0, # MILP 使用 km 级别的欧式距离做估算防超限
+                y=node.y / 1000.0,
+                demand=t.weight,
+                release=t.release_time,
+                deadline=t.deadline,
+                service_time=2.0
+            )
+        )
+        
+    stations = []
+    for s in env.stations.values():
+        node = env.graph.nodes[s.node_id]
+        stations.append(Station(id=s.id, x=node.x / 1000.0, y=node.y / 1000.0))
+        
+    depot_node = env.graph.nodes[env.depot.node_id]
+
     return OfflineInstance(
         num_vehicles=2,
-        vehicle_capacity=55,
-        battery_capacity=100,
-        horizon=180,
-        depot_x=0,
-        depot_y=0,
+        vehicle_capacity=env.vehicles[0].load_capacity,
+        battery_capacity=env.vehicles[0].battery_capacity,
+        horizon=env.config.end_time,
+        depot_x=depot_node.x / 1000.0,
+        depot_y=depot_node.y / 1000.0,
         tasks=tasks,
         stations=stations,
         max_station_visits_per_station=2,

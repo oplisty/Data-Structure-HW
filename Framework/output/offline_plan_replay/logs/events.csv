@@ -1,0 +1,10 @@
+time,event_type,task_id,vehicle_id,reason
+49,task_released,2,,
+58,task_released,1,,
+59,task_completed,2,,
+63,task_released,3,,
+70,vehicle_became_idle,,0,reach_depot
+81,task_completed,1,,
+92,vehicle_became_idle,,0,reach_depot
+99,task_completed,3,,
+106,vehicle_became_idle,,0,reach_depot

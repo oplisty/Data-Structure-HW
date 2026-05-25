@@ -1,0 +1,50 @@
+[
+  {
+    "time": 49,
+    "event_type": "task_released",
+    "task_id": 2
+  },
+  {
+    "time": 58,
+    "event_type": "task_released",
+    "task_id": 1
+  },
+  {
+    "time": 59,
+    "event_type": "task_completed",
+    "task_id": 2
+  },
+  {
+    "time": 63,
+    "event_type": "task_released",
+    "task_id": 3
+  },
+  {
+    "time": 70,
+    "event_type": "vehicle_became_idle",
+    "vehicle_id": 0,
+    "reason": "reach_depot"
+  },
+  {
+    "time": 81,
+    "event_type": "task_completed",
+    "task_id": 1
+  },
+  {
+    "time": 92,
+    "event_type": "vehicle_became_idle",
+    "vehicle_id": 0,
+    "reason": "reach_depot"
+  },
+  {
+    "time": 99,
+    "event_type": "task_completed",
+    "task_id": 3
+  },
+  {
+    "time": 106,
+    "event_type": "vehicle_became_idle",
+    "vehicle_id": 0,
+    "reason": "reach_depot"
+  }
+]

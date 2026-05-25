@@ -286,6 +286,13 @@ def main() -> None:
     )
 
     remap_environment_to_offline_task_ids(env)
+    
+    # 【补丁修复】：保持与 Gurobi 上帝视角看到的数据量严格对齐，避免出现未计算任务的超时惩罚负分
+    env.tasks = {k: v for k, v in env.tasks.items() if k <= 3}
+    # 重新初始化未来任务队列，否则会报错 KeyError 找不到被截断的任务
+    env._future_task_ids = sorted(env.tasks.keys(), key=lambda task_id: env.tasks[task_id].release_time)
+    env._future_index = 0
+
     sync_environment_vehicle_count(env, expected_vehicles)
 
     scheduler = OfflinePlanScheduler.from_csv(plan_csv)

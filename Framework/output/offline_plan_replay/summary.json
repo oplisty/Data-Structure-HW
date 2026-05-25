@@ -1,0 +1,318 @@
+{
+  "time": 180,
+  "total_score": 261.4904,
+  "completed": 3,
+  "expired": 0,
+  "pending": 0,
+  "assigned": 0,
+  "run_steps": 180,
+  "total_distance": 82.3652,
+  "avg_vehicle_utilization": 0.1528,
+  "avg_station_queue_length": 0.0,
+  "avg_task_completion_time": 23.0,
+  "avg_charge_waiting_time": 0.0,
+  "charge_sessions": 0,
+  "replay_compare": {
+    "vehicle_routes": [
+      {
+        "vehicle_id": 0,
+        "milp_semantic_route": [
+          "DEPOT_START",
+          "T_2",
+          "T_1",
+          "T_3",
+          "DEPOT_END"
+        ],
+        "semantic_stops": [
+          {
+            "vehicle_id": 0,
+            "seq": 0,
+            "semantic_node": "DEPOT_START",
+            "graph_node_id": 0
+          },
+          {
+            "vehicle_id": 0,
+            "seq": 1,
+            "semantic_node": "T_2",
+            "graph_node_id": 5
+          },
+          {
+            "vehicle_id": 0,
+            "seq": 2,
+            "semantic_node": "T_1",
+            "graph_node_id": 5
+          },
+          {
+            "vehicle_id": 0,
+            "seq": 3,
+            "semantic_node": "T_3",
+            "graph_node_id": 7
+          },
+          {
+            "vehicle_id": 0,
+            "seq": 4,
+            "semantic_node": "DEPOT_END",
+            "graph_node_id": 0
+          }
+        ],
+        "engine_node_route": [
+          0,
+          4,
+          5,
+          23,
+          20,
+          27,
+          7,
+          0
+        ],
+        "engine_segments": [
+          {
+            "from_semantic_node": "DEPOT_START",
+            "to_semantic_node": "T_2",
+            "node_path": [
+              0,
+              4,
+              5
+            ]
+          },
+          {
+            "from_semantic_node": "T_2",
+            "to_semantic_node": "T_1",
+            "node_path": [
+              5
+            ]
+          },
+          {
+            "from_semantic_node": "T_1",
+            "to_semantic_node": "T_3",
+            "node_path": [
+              5,
+              23,
+              20,
+              27,
+              7
+            ]
+          },
+          {
+            "from_semantic_node": "T_3",
+            "to_semantic_node": "DEPOT_END",
+            "node_path": [
+              7,
+              0
+            ]
+          }
+        ]
+      },
+      {
+        "vehicle_id": 1,
+        "milp_semantic_route": [
+          "DEPOT_START"
+        ],
+        "semantic_stops": [
+          {
+            "vehicle_id": 1,
+            "seq": 0,
+            "semantic_node": "DEPOT_START",
+            "graph_node_id": 0
+          }
+        ],
+        "engine_node_route": [
+          0
+        ],
+        "engine_segments": []
+      }
+    ],
+    "flat_rows": [
+      {
+        "vehicle_id": 0,
+        "record_type": "semantic_stop",
+        "seq": 0,
+        "semantic_node": "DEPOT_START",
+        "graph_node_id": 0,
+        "engine_node_id": "",
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "semantic_stop",
+        "seq": 1,
+        "semantic_node": "T_2",
+        "graph_node_id": 5,
+        "engine_node_id": "",
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "semantic_stop",
+        "seq": 2,
+        "semantic_node": "T_1",
+        "graph_node_id": 5,
+        "engine_node_id": "",
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "semantic_stop",
+        "seq": 3,
+        "semantic_node": "T_3",
+        "graph_node_id": 7,
+        "engine_node_id": "",
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "semantic_stop",
+        "seq": 4,
+        "semantic_node": "DEPOT_END",
+        "graph_node_id": 0,
+        "engine_node_id": "",
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 0,
+        "semantic_node": "",
+        "graph_node_id": 0,
+        "engine_node_id": 0,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 1,
+        "semantic_node": "",
+        "graph_node_id": 4,
+        "engine_node_id": 4,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 2,
+        "semantic_node": "",
+        "graph_node_id": 5,
+        "engine_node_id": 5,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 3,
+        "semantic_node": "",
+        "graph_node_id": 23,
+        "engine_node_id": 23,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 4,
+        "semantic_node": "",
+        "graph_node_id": 20,
+        "engine_node_id": 20,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 5,
+        "semantic_node": "",
+        "graph_node_id": 27,
+        "engine_node_id": 27,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 6,
+        "semantic_node": "",
+        "graph_node_id": 7,
+        "engine_node_id": 7,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_node",
+        "seq": 7,
+        "semantic_node": "",
+        "graph_node_id": 0,
+        "engine_node_id": 0,
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_segment",
+        "seq": 0,
+        "semantic_node": "",
+        "graph_node_id": "",
+        "engine_node_id": "[0, 4, 5]",
+        "segment_from": "DEPOT_START",
+        "segment_to": "T_2"
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_segment",
+        "seq": 1,
+        "semantic_node": "",
+        "graph_node_id": "",
+        "engine_node_id": "[5]",
+        "segment_from": "T_2",
+        "segment_to": "T_1"
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_segment",
+        "seq": 2,
+        "semantic_node": "",
+        "graph_node_id": "",
+        "engine_node_id": "[5, 23, 20, 27, 7]",
+        "segment_from": "T_1",
+        "segment_to": "T_3"
+      },
+      {
+        "vehicle_id": 0,
+        "record_type": "engine_segment",
+        "seq": 3,
+        "semantic_node": "",
+        "graph_node_id": "",
+        "engine_node_id": "[7, 0]",
+        "segment_from": "T_3",
+        "segment_to": "DEPOT_END"
+      },
+      {
+        "vehicle_id": 1,
+        "record_type": "semantic_stop",
+        "seq": 0,
+        "semantic_node": "DEPOT_START",
+        "graph_node_id": 0,
+        "engine_node_id": "",
+        "segment_from": "",
+        "segment_to": ""
+      },
+      {
+        "vehicle_id": 1,
+        "record_type": "engine_node",
+        "seq": 0,
+        "semantic_node": "",
+        "graph_node_id": 0,
+        "engine_node_id": 0,
+        "segment_from": "",
+        "segment_to": ""
+      }
+    ]
+  }
+}

@@ -142,14 +142,15 @@ class SimulationLogger:
             path.write_text("", encoding="utf-8")
             return
 
-        # 收集所有可能的字段名（因为不同事件可能有不同字段）
-        all_keys = set()
+        # 动态收集所有的键
+        keys = []
         for row in payload:
-            all_keys.update(row.keys())
-        
-        keys = sorted(all_keys)
-        
+            for k in row.keys():
+                if k not in keys:
+                    keys.append(k)
+
         with path.open("w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=keys, extrasaction='ignore')
+            # restval="" 保证那些没有某个键的行对应的列输出空
+            writer = csv.DictWriter(f, fieldnames=keys, restval="")
             writer.writeheader()
             writer.writerows(payload)
