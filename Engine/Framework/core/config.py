@@ -93,6 +93,16 @@ def preset_scenario(name: str) -> ScenarioConfig:
             horizon=480,
             station_num_piles=3,
         ),
+        "extreme": ScenarioConfig(
+            num_vehicles=30,
+            num_tasks=500,
+            num_stations=10,
+            num_road_nodes=180,
+            map_width=100,
+            map_height=100,
+            horizon=720,
+            station_num_piles=3,
+        ),
     }
     if name not in presets:
         raise ValueError(f"Unknown preset '{name}', choose from {sorted(presets)}")

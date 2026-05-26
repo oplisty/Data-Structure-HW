@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { SchedulingStrategy, Statistics } from '../types';
-import { SimulationEngine, ProblemScales } from '../core/simulation';
+import { SchedulingStrategy, Statistics, SimulationConfig } from '../types';
+import { ProblemScales } from '../core/simulation';
+import { apiClient } from '../services/api';
 import Link from 'next/link';
 
 // 策略配置
@@ -20,6 +21,32 @@ interface CompareResult {
   runTime: number;
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function runBackendSimulation(config: SimulationConfig): Promise<Statistics> {
+  const started = await apiClient.startSimulation(config);
+  if (!started.success || !started.data?.simulationId) {
+    throw new Error(started.error || '后端模拟启动失败');
+  }
+
+  const simulationId = started.data.simulationId;
+  try {
+    for (let attempt = 0; attempt < 900; attempt++) {
+      const snapshot = await apiClient.getSimulationState(simulationId);
+      if (!snapshot.success || !snapshot.data) {
+        throw new Error(snapshot.error || '获取后端模拟状态失败');
+      }
+      if (snapshot.data.status === 'completed') {
+        return snapshot.data.statistics;
+      }
+      await sleep(300);
+    }
+    throw new Error('后端模拟超时');
+  } finally {
+    await apiClient.stopSimulation(simulationId).catch(() => undefined);
+  }
+}
+
 export default function ComparePage() {
   const [selectedStrategies, setSelectedStrategies] = useState<SchedulingStrategy[]>(['nearest_first', 'largest_first', 'earliest_deadline']);
   const [selectedScale, setSelectedScale] = useState(ProblemScales[1]);
@@ -27,6 +54,7 @@ export default function ComparePage() {
   const [results, setResults] = useState<CompareResult[]>([]);
   const [progress, setProgress] = useState(0);
   const [currentStrategy, setCurrentStrategy] = useState<SchedulingStrategy | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // 运行对比测试
   const runComparison = useCallback(async () => {
@@ -35,50 +63,43 @@ export default function ComparePage() {
     setIsRunning(true);
     setResults([]);
     setProgress(0);
+    setErrorMessage(null);
 
     const newResults: CompareResult[] = [];
     const totalStrategies = selectedStrategies.length;
+    const comparisonSeed = 20260525 + selectedScale.vehicleCount * 101 + selectedScale.nodeCount * 17;
 
-    for (let i = 0; i < selectedStrategies.length; i++) {
-      const strategy = selectedStrategies[i];
-      setCurrentStrategy(strategy);
+    try {
+      for (let i = 0; i < selectedStrategies.length; i++) {
+        const strategy = selectedStrategies[i];
+        setCurrentStrategy(strategy);
 
-      // 创建新的引擎实例
-      const engine = new SimulationEngine();
-      engine.initialize({
-        scale: selectedScale,
-        strategy,
-        chargingStrategy: 'optimal_station', // 默认增加 chargingStrategy 参数
-        simulationSpeed: 100, // 快速模拟
-        maxSimulationTime: 240, // 4小时模拟
-        enableCollaboration: strategy === 'collaborative'
-      });
-
-      // 运行模拟
-      const startTime = Date.now();
-      
-      // 使用Promise来等待模拟完成
-      await new Promise<void>((resolve) => {
-        engine.setOnStateChange((state) => {
-          if (state.status === 'completed') {
-            const endTime = Date.now();
-            newResults.push({
-              strategy,
-              statistics: { ...state.statistics },
-              runTime: endTime - startTime
-            });
-            setResults([...newResults]);
-            resolve();
-          }
+        const startTime = Date.now();
+        const statistics = await runBackendSimulation({
+          scale: selectedScale,
+          strategy,
+          chargingStrategy: 'optimal_station',
+          simulationSpeed: 50,
+          maxSimulationTime: 240,
+          enableCollaboration: strategy === 'collaborative',
+          randomSeed: comparisonSeed,
         });
-        engine.start();
-      });
+        const endTime = Date.now();
 
-      setProgress(((i + 1) / totalStrategies) * 100);
+        newResults.push({
+          strategy,
+          statistics: { ...statistics },
+          runTime: endTime - startTime,
+        });
+        setResults([...newResults]);
+        setProgress(((i + 1) / totalStrategies) * 100);
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '策略对比失败，请检查后端是否已启动');
+    } finally {
+      setCurrentStrategy(null);
+      setIsRunning(false);
     }
-
-    setCurrentStrategy(null);
-    setIsRunning(false);
   }, [selectedStrategies, selectedScale]);
 
   // 切换策略选择
@@ -197,7 +218,13 @@ export default function ComparePage() {
 
             {currentStrategy && (
               <div className="mt-4 text-center text-sm text-gray-400">
-                正在测试: {strategies.find(s => s.id === currentStrategy)?.name}
+                正在通过后端测试: {strategies.find(s => s.id === currentStrategy)?.name}
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="mt-4 rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-300">
+                {errorMessage}
               </div>
             )}
           </div>

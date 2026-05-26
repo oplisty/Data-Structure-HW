@@ -16,8 +16,11 @@ def build_environment(
     enable_collaborative_tasks: bool = True,
     auto_collaborative_dispatch: bool = True,
     charging_strategy: str = "optimal_station",
+    random_seed: int | None = None,
 ) -> Environment:
     scenario = preset_scenario(scale)
+    if random_seed is not None:
+        scenario.random_seed = random_seed
     scenario.collaborative_task_ratio = collaborative_task_ratio
     map_bundle = generate_random_map(scenario)
     tasks = generate_dynamic_tasks(scenario, map_bundle.task_candidate_nodes)
@@ -64,7 +67,7 @@ def build_environment(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run baseline EV logistics simulation")
     parser.add_argument("--config", default=None, help="YAML config path")
-    parser.add_argument("--scale", choices=["small", "medium", "large"], default="small")
+    parser.add_argument("--scale", choices=["small", "medium", "large", "extreme"], default="small")
     parser.add_argument("--scheduler", choices=["nearest", "heaviest", "earliest_deadline"], default="nearest")
     parser.add_argument("--charging-strategy", choices=["optimal_station", "nearest_station"], default="optimal_station")
     parser.add_argument("--collaborative-task-ratio", type=float, default=0.0)

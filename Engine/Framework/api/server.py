@@ -769,13 +769,16 @@ def _build_environment(
     enable_collaboration: bool,
     max_simulation_time: int,
     charging_strategy: str,
+    random_seed: int | None = None,
 ) -> Environment:
     """Prefer real Panyu processed map; fallback to random map if unavailable."""
     engine_root = Path(__file__).resolve().parents[2]
     processed_dir = engine_root / "Map Resource" / "processed" / "panyu"
 
     if processed_dir.exists():
-        scenario = preset_scenario(scale_id if scale_id in {"small", "medium", "large"} else "medium")
+        scenario = preset_scenario(scale_id if scale_id in {"small", "medium", "large", "extreme"} else "medium")
+        if random_seed is not None:
+            scenario.random_seed = random_seed
         scenario.horizon = max_simulation_time
         scenario.collaborative_task_ratio = 0.3 if enable_collaboration else 0.0
 
@@ -832,14 +835,18 @@ def _build_environment(
         )
 
     # Fallback for environments without processed data files.
-    return build_random_environment(
+    env = build_random_environment(
         scale=scale_id,
-        scheduler_name=scheduler_name,
+        scheduler_name="nearest" if scheduler_name == "q_learning" else scheduler_name,
         collaborative_task_ratio=0.3 if enable_collaboration else 0.0,
         enable_collaborative_tasks=enable_collaboration,
         auto_collaborative_dispatch=enable_collaboration,
         charging_strategy=_normalize_charging_strategy(charging_strategy),
+        random_seed=random_seed,
     )
+    if scheduler_name == "q_learning":
+        env.scheduler = QLearningScheduler(_load_q_learning_agent())
+    return env
 
 
 def _vehicle_status_for_ui(status: str) -> str:
@@ -1349,6 +1356,7 @@ async def start_simulation(req: SimulationStartRequest) -> dict[str, Any]:
         enable_collaboration=req.enableCollaboration,
         max_simulation_time=req.maxSimulationTime,
         charging_strategy=req.chargingStrategy,
+        random_seed=req.randomSeed,
     )
 
     env.end_time = req.maxSimulationTime
