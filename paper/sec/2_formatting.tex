@@ -1,4 +1,4 @@
-\section{Framwork}
+\section{Framework}
 \label{sec:framework}
 
 \begin{figure*}[t]
@@ -94,9 +94,9 @@ Beyond the above baselines, we further implement an online reinforcement learnin
 
 \begin{figure*}[t]
   \centering
-  \refstepcounter{figure}\label{alg:qlearning_policy}
+  \refstepcounter{algorithm}\label{alg:qlearning_policy}
   \begin{minipage}{0.96\textwidth}
-  \textbf{Algorithm \thefigure: Q-learning-based Policy Selection}
+  \textbf{Algorithm \thealgorithm: Q-learning-based Policy Selection}
   \vspace{0.4em}
   \begin{algorithmic}[1]
   \Require training episodes \(M\), learning rate \(\alpha\), discount factor \(\gamma\), initial exploration rate \(\epsilon\), decay factor \(\rho\), discrete state space \(S\), action space \(A\)
@@ -122,9 +122,9 @@ Beyond the above baselines, we further implement an online reinforcement learnin
 
 \begin{figure*}[t]
   \centering
-  \refstepcounter{figure}\label{alg:offline_milp_planning}
+  \refstepcounter{algorithm}\label{alg:offline_milp_planning}
   \begin{minipage}{0.96\textwidth}
-  \textbf{Algorithm \thefigure: Offline MILP-based Global Planning}
+  \textbf{Algorithm \thealgorithm: Offline MILP-based Global Planning}
   \vspace{0.5em}
   Given the full-information task set \(\mathcal{T}\), vehicle set \(\mathcal{V}\), expanded node set \(\mathcal{N}\), and arc cost matrix \(C\), the offline planner solves the following mixed-integer linear program:
   \begin{equation}

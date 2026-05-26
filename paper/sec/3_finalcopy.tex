@@ -21,38 +21,15 @@ To comprehensively evaluate the performance of different methods in the dynamic 
 
 \noindent \textbf{Task effectiveness metrics:}
 \begin{itemize}
-    \item \textbf{Final Score:} For each completed task \(\tau_i\), its reward is defined as
-    \[
-    \mathrm{Score}(\tau_i)=
-    \max\left(
-    0,
-    R_0
-    -\alpha \cdot \min\left(\frac{d_i}{D_{\mathrm{ref}}},1\right)
-    -P_{\mathrm{late}}\cdot \mathbb{I}(t_i^{\mathrm{finish}}>d_i^{\mathrm{deadline}})
-    \right).
-    \]
-    Here, \(R_0\) is the base reward, \(d_i\) is the service travel distance of task \(i\), \(D_{\mathrm{ref}}\) is the reference distance used for normalization, \(\alpha\) is the normalized distance-cost weight, and \(P_{\mathrm{late}}\) is the penalty for late completion. In our implementation, \(R_0=100\), \(\alpha=30\), and \(P_{\mathrm{late}}=60\). Unfinished expired tasks receive an additional failure penalty \(P_{\mathrm{fail}}\), and the final score is
-    \[
-    \mathrm{FinalScore}=
-    \sum_{i\in\mathcal{T}_{\mathrm{completed}}}\mathrm{Score}(\tau_i)
-    -P_{\mathrm{fail}}\cdot \lvert\mathcal{T}_{\mathrm{expired}}\rvert
-    +S_{\mathrm{partial}},
-    \]
-    where \(P_{\mathrm{fail}}=60\) by default and \(S_{\mathrm{partial}}\) denotes optional partial credit for collaborative tasks. This scoring function does not directly penalize task waiting time; instead, it considers completion, normalized service distance, and whether the task is completed after its deadline.
-    
     \item \textbf{Completed Tasks:} The number of tasks completed by the end of the simulation.
     \item \textbf{Expired Tasks:} The number of tasks that pass their deadlines and remain unfinished by the end of the simulation.
-    \item \textbf{Total Tardiness:} This metric is used for offline MILP result analysis. It is defined as the sum of task delays over all tasks
-    \[
-    \sum_n \max(0, \mathrm{arr}_n-d_n).
-    \]
+    \item \textbf{Total Tardiness:} This metric is used for offline MILP result analysis. It is defined as the sum of task delays over all tasks.
     If a task is completed before its deadline, its tardiness is recorded as 0.
 \end{itemize}
 
 \noindent \textbf{Operating cost metrics:}
 \begin{itemize}
     \item \textbf{Total Distance:} The sum of the travel distances of all vehicles.
-    
     \item \textbf{Steps:} the number of discrete time steps from the initial time to the end of the simulation in online simulation. 
     \item \textbf{Makespan:}the maximum completion time after all vehicles finish service and return to the depot in offline MILP.
     \item \textbf{Charging Burden:} We report two statistics: 1) \textbf{the number of charging triggers}, which measures how often the system enters the charging process; and 2) \textbf{the average queue load}, which measures congestion caused by competition for charging resources.
@@ -65,15 +42,22 @@ To comprehensively evaluate the performance of different methods in the dynamic 
 \end{itemize}
 
 \subsection{Experiment Results}
-The focus of this experimental analysis includes the performance differences of fixed heuristic baselines across different problem scales, the advantages of the Q-learning hyper-heuristic over the best baseline, the convergence characteristics of Q-learning during training, and the impact of charging strategy design on overall system performance. For ease of explanation, this paper mainly discusses the following four figures: Figure 1 presents the main results comparison of fixed heuristic baselines across three problem scales; Figure 2 shows the overall comparison between Q-learning and the best baseline; Figure 3 illustrates the convergence curves of Q-learning under different training scales; and Figure 4 reports the results of the charging strategy ablation experiment.
+The focus of this experimental analysis includes the performance differences of fixed heuristic baselines across different problem scales, the advantages of the Q-learning hyper-heuristic over the best baseline, the convergence characteristics of Q-learning during training, and the impact of charging strategy design on overall system performance. 
+
 \subsubsection{Baseline Comparison}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../experiments/figures/main/fig_baseline_multi_scale.pdf}
-    \caption{Main comparison of heuristic baselines across three problem scales. It shows the performance of three fixed heuristic scheduling strategies (Nearest, EDF, and Heaviest) under three task scales: small, medium, and large. The comparison metrics include Final Score, Completed Tasks, Expired Tasks, and Total Distance. In this set of experiments, all baselines adopt the optimal station charging strategy to reduce the interference of differences in charging strategies on the main comparison results.}
+    \caption{Main comparison of heuristic baselines across three problem scales. }
     \label{fig:baseline_multi_scale}
 \end{figure}
-Overall, as the scenario scale expands from small to medium and large, the system load, task density, vehicle conflicts, and competition for charging resources gradually intensify, making the performance differences among different fixed heuristic strategies increasingly evident. In the small scenario, the system pressure is relatively low. Nearest and EDF both achieve good performance in terms of Final Score and Completed Tasks, while Heaviest performs relatively poorly. This indicates that both local path efficiency and task deadline constraints can effectively support scheduling decisions at a small scale. In the medium scenario, scheduling pressure increases, and EDF generally outperforms the other baselines in Final Score and Completed Tasks. Nearest remains competitive, whereas Heaviest performs worse in Expired Tasks due to its insufficient responsiveness to urgent tasks. In the large scenario, the high-load environment further amplifies the limitations of fixed rules. Although EDF and Nearest still clearly outperform Heaviest, both Expired Tasks and Total Distance increase significantly, indicating that a single heuristic rule struggles to balance path efficiency, task urgency, and resource competition simultaneously. Moreover, rule differences accumulate in large-scale scenarios, leading to more pronounced performance divergence.
+Since the three scenarios contain different numbers of tasks, the absolute number of completed tasks should not be compared across scales directly; instead, the score, expired tasks, and distance should be interpreted together within each scale.
+\begin{itemize}
+    \item \textbf{Small scale:} All three heuristics produce close results. Nearest achieves the highest average Final Score of \textbf{2354.10}, with \textbf{26.0} completed tasks and \textbf{0.4} expired tasks. EDF follows with a score of \textbf{2309.03}, and Heaviest obtains \textbf{2271.05}. This indicates that under light system pressure, all three simple dispatching rules can handle most tasks, and the advantage of any single rule is limited.
+    \item \textbf{Medium scale:} The performance gap becomes clearer. Nearest remains the strongest baseline, achieving an average Final Score of \textbf{3662.73}, with \textbf{47.6} completed tasks and \textbf{36.6} expired tasks. Heaviest ranks second with a score of \textbf{3187.80}, while EDF obtains \textbf{2805.43} and produces the most expired tasks among the three baselines. This suggests that deadline priority alone is not sufficient when vehicles also face travel-distance, battery, and charging constraints.
+    \item \textbf{Large scale:} All baselines complete more tasks in absolute number because the scenario contains many more tasks, but the number of expired tasks increases sharply. Nearest still obtains the best score among the three heuristics, with \textbf{1605.12} and \textbf{61.8} completed tasks, followed by Heaviest with \textbf{1054.17} and EDF with \textbf{525.16}. These results show that fixed rules become increasingly limited under high task density and resource competition, while distance-aware dispatching remains the most robust fixed baseline in the current environment.
+\end{itemize}
+
 \subsubsection{Comparison with Q-learning}
 
 \begin{figure}[htbp]
@@ -83,7 +67,13 @@ Overall, as the scenario scale expands from small to medium and large, the syste
     \label{fig:qlearning_vs_baseline}
 \end{figure}
 
-In the small scenario, Q-HH-Small performs particularly well, achieving a Final Score of about 2554.64, around 28 Completed Tasks, and almost 0 Expired Tasks, indicating that Q-learning can quickly learn effective rule-switching strategies under a smaller state space and lower resource-conflict conditions. In contrast, Q-HH-Mixed obtains a slightly lower Final Score of about 2424.37, with a similar number of Completed Tasks but 2 Expired Tasks, suggesting a trade-off between generalization and specialization. In the medium scenario, Q-HH-Medium also shows strong competitiveness, with a Final Score of about 2417.17, around 52 Completed Tasks, and 32 Expired Tasks. Although Q-learning may not outperform the best fixed baseline on every individual metric, it can dynamically switch among heuristic rules to balance path efficiency, task urgency, and resource constraints, thereby maintaining strong overall performance. The inclusion of Q-HH-Mixed further demonstrates the cross-scale generalization ability of the hyper-heuristic: while it sacrifices some peak performance compared with scale-specific models, it learns transferable rule-selection patterns. Overall, Figure 2 shows that Q-learning can compete with or even surpass the best fixed heuristic, with its main value lying in state-dependent heuristic selection rather than the creation of a single new heuristic rule.
+We compares the learned Q-learning hyper-heuristic with the strongest fixed baseline under the corresponding evaluation settings.
+\begin{itemize}
+    \item \textbf{Small scale:} Q-HH-Small achieves a Final Score of \textbf{2399.09}, with \textbf{26.6} completed tasks and \textbf{0.6} expired tasks, slightly outperforming the best fixed baseline in terms of score while maintaining a similar task completion level. Q-HH-Mixed also performs well on the small-scale evaluation, obtaining a higher Final Score of \textbf{2515.96} and \textbf{28.2} completed tasks, but with \textbf{1.8} expired tasks on average. This suggests that mixed-scale training can improve task completion and overall score, although it may introduce a small increase in expiration risk.
+    \item \textbf{Medium scale:} Q-HH-Medium achieves an average Final Score of \textbf{3050.90}, with \textbf{42.6} completed tasks and \textbf{43.6} expired tasks. Compared with the strongest medium-scale baseline, Nearest, the learned policy is less competitive in the final evaluation runs. This indicates that the medium setting remains challenging for tabular Q-learning due to the larger state space, denser tasks, and stronger coupling between dispatching and charging.
+    \item \textbf{Training evidence:} The training logs show that Q-HH-Medium reaches a best evaluation score of \textbf{4651.62} during training. This demonstrates that Q-learning can discover high-quality rule-selection policies, although their stability across evaluation seeds still needs improvement. 
+\end{itemize}
+Overall, Figure~\ref{fig:qlearning_vs_baseline} indicates that Q-learning can be competitive in small-scale and mixed-scale settings, while medium-scale generalization remains more difficult and requires more stable learning or richer state representations.
 \subsubsection{Training Convergence}
 \begin{figure}[htbp]
     \centering
@@ -91,18 +81,37 @@ In the small scenario, Q-HH-Small performs particularly well, achieving a Final 
     \caption{Convergence curves of Q-learning under different training scales}
     \label{fig:qlearning_convergence}
 \end{figure}
-Overall, Figure 3 shows that Q-learning demonstrates good convergence in the current scheduling problem, but its training performance changes significantly as task scale and environmental complexity increase. The small model, with a smaller state space, simpler task interactions, and fewer resource conflicts, can reach a high reward level at an early stage. Its smoothed training curve shows relatively small fluctuations, and eval score mean gradually stabilizes in the middle and later stages, indicating that tabular Q-learning can more easily learn a stable near-optimal strategy. In contrast, the training process of the medium model is more complex. The raw curves of both Total Reward and Eval Score Mean fluctuate more strongly; although the smoothed curves still show an overall upward trend, convergence is slower and mid-stage fluctuations are more pronounced. This reflects the stronger coupling among battery constraints, path selection, task deadlines, and competition for charging resources. The Mixed model reflects the characteristics of generalization-oriented training: it has larger early-stage fluctuations and usually converges more slowly than the specifically trained small model, because it needs to switch among scenarios of different scales and learn more general rule-selection patterns. However, as training progresses, its evaluation curve gradually becomes stable, suggesting that it has learned certain cross-scenario transferable patterns. Therefore, the Q-learning hyper-heuristic is not a random or uncontrollable strategy-switching mechanism, but can gradually form an effective scheduling strategy. Nevertheless, the larger the task scale and the more complex the environment, the greater the training difficulty and instability. Although mixed training sacrifices some convergence speed and peak performance, it provides a feasible path toward building a unified scheduling framework with cross-scale generalization ability.
+We found that Q-learning can improve policy quality during training, but the stability of learning depends strongly on the scenario scale.
+\begin{itemize}
+    \item \textbf{Small scale:} The small model has the most stable learning behavior. It reaches a best evaluation score of \textbf{2550.60} at episode \textbf{155}, and the smoothed curves fluctuate less than those of the larger-scale settings. This confirms that tabular Q-learning is suitable when the state space and task interactions are relatively simple.
+    \item \textbf{Medium scale:} The medium model exhibits stronger fluctuations. Although it reaches a high best evaluation score of \textbf{4651.62} at episode \textbf{230}, its final evaluation score decreases. This shows that the learned policy can find high-reward behaviors, but it is less stable under the more complex medium-scale environment.
+    \item \textbf{Mixed scale:} The Mixed model shows a similar pattern. It reaches a best evaluation score of \textbf{4455.95} at episode \textbf{237}, indicating that cross-scale training can discover strong policies. However, the final smoothed performance still fluctuates because the model alternates between different scenario distributions.
+\end{itemize}
+These results suggest that the Q-learning hyper-heuristic is a feasible rule-selection mechanism, but larger or mixed scenarios require more robust training strategies, richer state encoding, or function approximation to improve evaluation stability.
 
 \subsubsection{Ablation}
-\begin{figure}[htbp]
+\begin{table}[htbp]
     \centering
-    \includegraphics[width=\linewidth]{../experiments/figures/main/fig_charging_ablation.pdf}
-    \caption{Results of the charging strategy ablation experiment}
-    \label{fig:charging_strategy_ablation}
-\end{figure}
+    \caption{Charging strategy ablation results on the medium-scale setting.}
+    \label{tab:charging_strategy_ablation}
+    \resizebox{\linewidth}{!}{%
+    \begin{tabular}{lrrrr}
+        \toprule
+        Method / strategy & Final Score & Completed & Expired & Avg. Queue \\
+        \midrule
+        Fixed baseline + optimal station & -- & \textbf{47.6} & \textbf{36.6} & \textbf{0.018} \\
+        Fixed baseline + nearest station & -- & \textbf{47.6} & \textbf{36.6} & \textbf{0.018} \\
+        Q-learning + optimal station & \textbf{2935.14} & \textbf{34.6} & \textbf{11.8} & -- \\
+        Q-learning + nearest station & \textbf{2836.04} & \textbf{33.6} & \textbf{12.0} & -- \\
+        \bottomrule
+    \end{tabular}%
+    }
+\end{table}
 
-Overall, the results show that the optimal charging station strategy generally leads to a higher task completion rate and fewer expired tasks than the nearest charging station strategy. This indicates that choosing the nearest charging station based only on distance can reduce the travel cost of a single trip in the short term, but it may also cause multiple vehicles to gather at the same station, leading to queueing delays and resource congestion. In contrast, the optimal charging station strategy considers travel distance, station load, and charger occupancy together, allowing charging demand to be distributed from a more global perspective and thereby improving the overall operational efficiency of the system.
-
-At the same time, the charging strategy affects not only the performance of fixed heuristic methods, but also the Q-learning hyper-heuristic. Even when the task scheduling layer can dynamically select different rules through the learning mechanism, the allocation of charging resources at the lower level still directly influences the final scheduling outcome. The results show that Q-learning combined with a more reasonable charging strategy usually completes more tasks and reduces task expiration. This suggests that the learning-based scheduling module cannot fully replace the resource allocation module; instead, the two form a collaborative relationship. Task scheduling determines which tasks vehicles should prioritize, while the charging strategy determines how vehicles can maintain their operational capability more efficiently.
-
-It should be noted that charging-wait-related metrics are more suitable for reflecting trend differences between strategies and should not be interpreted as strict absolute waiting times. Even so, the overall trend clearly shows that the optimal charging station strategy has clear advantages in alleviating resource conflicts, reducing concentrated vehicle queues, and improving system coordination. Therefore, charging strategy design is an important factor affecting overall system performance. It should not be treated merely as an auxiliary module, but should be jointly optimized together with the task scheduling strategy.
+Overall, the charging strategy ablation shows different effects for fixed heuristics and Q-learning.
+\begin{itemize}
+    \item \textbf{Fixed baseline:} For the baseline nearest-task scheduler, the two charging strategies obtain almost identical results in the current medium-scale runs. Both strategies complete \textbf{47.6} tasks on average, produce \textbf{36.6} expired tasks, and have a very low average queue load of about \textbf{0.018}. This indicates that under the current baseline setting, charging congestion is not the dominant factor limiting performance; task assignment and deadline pressure play a larger role.
+    \item \textbf{Q-learning with optimal station:} Q-learning with optimal station selection achieves an average Final Score of \textbf{2935.14}, with \textbf{34.6} completed tasks and \textbf{11.8} expired tasks. This shows that a more informed charging decision can slightly improve the learned policy by reducing expiration and increasing task completion.
+    \item \textbf{Q-learning with nearest station:} Q-learning with nearest station selection obtains a lower Final Score of \textbf{2836.04}, with \textbf{33.6} completed tasks and \textbf{12.0} expired tasks. Compared with optimal station selection, the nearest-station rule is simpler but less effective for the learned scheduling policy.
+\end{itemize}
+These results suggest that charging strategy design should be considered jointly with task scheduling, but its impact depends on the policy type and congestion level. In the fixed baseline runs, the two station selection strategies behave similarly because charging queues remain short. In the Q-learning runs, optimal station selection provides a clearer benefit, showing that learned scheduling and resource allocation can reinforce each other. Therefore, charging optimization is not merely an auxiliary detail; it can affect the final policy performance, especially when the scheduling method is adaptive and interacts more frequently with battery and station states.

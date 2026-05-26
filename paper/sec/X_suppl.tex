@@ -1,17 +1,119 @@
 \clearpage
+\onecolumn
 \setcounter{page}{1}
-\maketitlesupplementary
+\begin{center}
+{\Large\bfseries Dynamic Collaborative Scheduling System for New Energy Logistics Fleets Based on Graph Algorithms and Reinforcement Learning\\[0.5em]}
+{\large Supplementary Material}
+\end{center}
+\vspace{1em}
 
+\section{Evaluation Metrics}
+\label{sec:supp_eval_metrics}
 
-\section{Rationale}
-\label{sec:rationale}
-% 
-Having the supplementary compiled together with the main paper means that:
-% 
-\begin{itemize}
-\item The supplementary can back-reference sections of the main paper, for example, we can refer to \cref{sec:intro};
-\item The main paper can forward reference sub-sections within the supplementary explicitly (e.g. referring to a particular experiment); 
-\item When submitted to arXiv, the supplementary will already included at the end of the paper.
-\end{itemize}
-% 
-To split the supplementary pages from the main paper, you can use \href{https://support.apple.com/en-ca/guide/preview/prvw11793/mac#:~:text=Delete%20a%20page%20from%20a,or%20choose%20Edit%20%3E%20Delete).}{Preview (on macOS)}, \href{https://www.adobe.com/acrobat/how-to/delete-pages-from-pdf.html#:~:text=Choose%20%E2%80%9CTools%E2%80%9D%20%3E%20%E2%80%9COrganize,or%20pages%20from%20the%20file.}{Adobe Acrobat} (on all OSs), as well as \href{https://superuser.com/questions/517986/is-it-possible-to-delete-some-pages-of-a-pdf-document}{command line tools}.
+This supplementary section provides the mathematical definitions of the evaluation metrics used in the main paper.
+
+\subsection{Task Effectiveness Metrics}
+
+\paragraph{Final Score.}
+For each completed task \(\tau_i\), its reward is defined as
+\[
+\mathrm{Score}(\tau_i)=
+\max
+\left(
+0,
+R_0
+-
+\alpha \cdot
+\min
+\left(
+\frac{d_i}{D_{\mathrm{ref}}},
+1
+\right)
+-
+P_{\mathrm{late}}\cdot
+\mathbb{I}\left(t_i^{\mathrm{finish}}>d_i^{\mathrm{deadline}}\right)
+\right).
+\]
+Here, \(R_0\) is the base reward, \(d_i\) is the service travel distance of task \(i\), \(D_{\mathrm{ref}}\) is the reference distance used for normalization, \(\alpha\) is the normalized distance-cost weight, and \(P_{\mathrm{late}}\) is the penalty for late completion. In our implementation, we use
+\[
+R_0=100,
+\qquad
+\alpha=30,
+\qquad
+P_{\mathrm{late}}=60.
+\]
+This scoring function does not directly penalize task waiting time. Instead, it considers whether the task is completed, how long the service travel distance is after normalization, and whether the task is completed after its deadline.
+
+The total final score is computed as
+\[
+\mathrm{FinalScore}=
+\sum_{i\in\mathcal{T}_{\mathrm{completed}}}
+\mathrm{Score}(\tau_i)
+-
+P_{\mathrm{fail}}\cdot
+\lvert\mathcal{T}_{\mathrm{expired}}\rvert
++
+S_{\mathrm{partial}}.
+\]
+Here, \(P_{\mathrm{fail}}=60\) by default, \(\mathcal{T}_{\mathrm{completed}}\) is the set of completed tasks, \(\mathcal{T}_{\mathrm{expired}}\) is the set of unfinished expired tasks, and \(S_{\mathrm{partial}}\) denotes optional partial credit for collaborative tasks.
+
+\paragraph{Completed Tasks.}
+Completed Tasks denotes the number of tasks completed by the end of the simulation:
+\[
+\mathrm{CompletedTasks}=\lvert\mathcal{T}_{\mathrm{completed}}\rvert.
+\]
+
+\paragraph{Expired Tasks.}
+Expired Tasks denotes the number of tasks that pass their deadlines and remain unfinished by the end of the simulation:
+\[
+\mathrm{ExpiredTasks}=\lvert\mathcal{T}_{\mathrm{expired}}\rvert.
+\]
+
+\paragraph{Total Tardiness.}
+Total Tardiness is mainly used for offline MILP result analysis and is defined as
+\[
+\mathrm{TotalTardiness}
+=
+\sum_n \max(0,\mathrm{arr}_n-d_n),
+\]
+where \(\mathrm{arr}_n\) denotes the arrival time at task \(n\), and \(d_n\) is its deadline.
+
+\subsection{Operating Cost Metrics}
+
+\paragraph{Total Distance.}
+Total Distance is the sum of travel distances of all vehicles:
+\[
+\mathrm{TotalDistance}
+=
+\sum_{v\in\mathcal{V}}\mathrm{dist}_v.
+\]
+
+\paragraph{Steps.}
+Steps denotes the number of discrete simulation time steps from the initial time to the end of the online simulation.
+
+\paragraph{Makespan.}
+Makespan is used for offline MILP result analysis and denotes the maximum completion time after all vehicles finish service and return to the depot:
+\[
+\mathrm{Makespan}=\max_{v\in\mathcal{V}}T_v^{\mathrm{finish}}.
+\]
+
+\paragraph{Charging Burden.}
+Charging Burden is measured using two statistics: the number of charging triggers and the average queue load. The number of charging triggers measures how often vehicles enter the charging process, while the average queue load measures congestion caused by competition for charging resources.
+
+\subsection{Training-stage Metrics}
+
+\paragraph{Total Reward.}
+Total Reward is the sum of immediate rewards over all decision steps in a single Q-learning training episode:
+\[
+\mathrm{TotalReward}=
+\sum_t r_t.
+\]
+
+\paragraph{Eval Score Mean.}
+Eval Score Mean is the mean final score obtained by applying the greedy policy over several evaluation episodes after each training round:
+\[
+\mathrm{EvalScoreMean}
+=
+\frac{1}{K}\sum_{k=1}^{K}\mathrm{FinalScore}^{(k)}.
+\]
+This metric measures the stable performance of the learned policy and avoids relying only on a single training trajectory.
