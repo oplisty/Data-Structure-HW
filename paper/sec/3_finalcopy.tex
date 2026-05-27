@@ -80,7 +80,7 @@ These results indicate that tabular Q-learning is feasible for adaptive rule sel
     }
 \end{table}
 
-Table~\ref{tab:charging_strategy_ablation} compares \texttt{optimal\_station} and \texttt{nearest\_station} in the medium-scale setting. For the fixed Nearest scheduler, the two charging strategies produce almost identical results: both complete \textbf{47.6} tasks, produce \textbf{36.6} expired tasks, and have an average queue load of only \textbf{0.018}. This suggests that charging congestion is not the main bottleneck in the current fixed-baseline runs.
+Table~\ref{tab:charging_strategy_ablation} compares optimal\_station and nearest\_station in the medium-scale setting. For the fixed Nearest scheduler, the two charging strategies produce almost identical results: both complete \textbf{47.6} tasks, produce \textbf{36.6} expired tasks, and have an average queue load of only \textbf{0.018}. This suggests that charging congestion is not the main bottleneck in the current fixed-baseline runs.
 
 For Q-learning, optimal station selection performs slightly better than nearest station selection. It obtains a final score of \textbf{2935.14}, compared with \textbf{2836.04} under nearest station selection. It also completes slightly more tasks and produces fewer expired tasks. This shows that charging decisions can interact with adaptive scheduling policies, although the effect is still limited under the current queue-load setting.
 

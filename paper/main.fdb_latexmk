@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1779890655.53064 "main.tex" "main.pdf" "main" 1779890657.94048 0
+["pdflatex"] 1779894223.55963 "main.tex" "main.pdf" "main" 1779894225.67081 0
   "../experiments/figures/main/fig_baseline_multi_scale.pdf" 1779871913.05089 20849 360a820f5daf793d1f06c89338836140 ""
   "../experiments/figures/main/fig_qlearning_training_curves.pdf" 1779871913.05142 31611 c5e839ce721b5cbda80d30fd976e9d46 ""
   "../experiments/figures/main/fig_qlearning_vs_best_baseline.pdf" 1779871913.05174 18826 055c4e285f0dccfe2a2dda6921d8599e ""
@@ -152,14 +152,14 @@
   "cvpr.sty" 1779803940.21637 17969 3445318c9c9e09b8ef62b6aaa240cbba ""
   "figure/framework.pdf" 1779872372.20412 1960669 92f49ceef6276fac54c8cae810a206a7 ""
   "figure/image.png" 1779871919.41611 815315 96af461418854cf0d3bccbcb749f862e ""
-  "main.aux" 1779890657.87534 8605 b7db04de36ae0af2973a032a254e24d9 "pdflatex"
-  "main.out" 1779890657.87592 3774 d3d5bd39f0e35e393cb034e34264a504 "pdflatex"
-  "main.tex" 1779871919.41628 2451 68b1413adc7b72a681f54cc8916addef ""
+  "main.aux" 1779894225.60977 8605 021a8467abbb350c3efa291964c03f7d "pdflatex"
+  "main.out" 1779894225.61049 3774 d3d5bd39f0e35e393cb034e34264a504 "pdflatex"
+  "main.tex" 1779894206.64841 2451 13382f4050475628753f166e7617a9c6 ""
   "preamble.tex" 1779803940.21755 1380 fce35e804845ec73d7cbbe9e69d8975c ""
-  "sec/0_abstract.tex" 1779890405.2874 1366 371d2e5191456ba9d3d59311d156fc08 ""
+  "sec/0_abstract.tex" 1779894014.44789 1309 5fe94db08e04d91576dc3ae8ab08e04d ""
   "sec/1_intro.tex" 1779890405.28837 2327 c3231e634c0327f4084e17365470a7f5 ""
   "sec/2_formatting.tex" 1779890617.81575 19921 f9b61e6d90fe908ab65b68b0b15f9789 ""
-  "sec/3_finalcopy.tex" 1779890479.66021 8995 0f7cb7b8e3ac4dc5fbcd860fd66de4a3 ""
+  "sec/3_finalcopy.tex" 1779893579.56192 8977 538d98fa0f684659fe4636c0db3ecbc3 ""
   "sec/4_conclusion.tex" 1779890422.73173 2691 d4824fcf168628c7c84dbe07dfbd0994 ""
   "sec/X_suppl.tex" 1779890509.52749 4203 60cbab41c6a34f1cf72a0c6130fd9f97 ""
   (generated)
