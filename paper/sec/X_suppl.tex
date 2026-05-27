@@ -2,7 +2,7 @@
 \onecolumn
 \setcounter{page}{1}
 \begin{center}
-{\Large\bfseries Dynamic Collaborative Scheduling System for New Energy Logistics Fleets Based on Graph Algorithms and Reinforcement Learning\\[0.5em]}
+{\Large\bfseries Dynamic Scheduling System for New Energy Logistics Fleets Based on Graph Algorithms and Reinforcement Learning\\[0.5em]}
 {\large Supplementary Material}
 \end{center}
 \vspace{1em}
@@ -10,12 +10,12 @@
 \section{Evaluation Metrics}
 \label{sec:supp_eval_metrics}
 
-This supplementary section provides the mathematical definitions of the evaluation metrics used in the main paper.
+This supplementary section gives the mathematical definitions of the evaluation metrics used in the experiments. The main paper explains the meaning and comparison results of these metrics, while the supplementary material keeps the formulas for reproducibility.
 
 \subsection{Task Effectiveness Metrics}
 
 \paragraph{Final Score.}
-For each completed task \(\tau_i\), its reward is defined as
+For each completed task \(\tau_i\), the task score is defined as
 \[
 \mathrm{Score}(\tau_i)=
 \max
@@ -26,15 +26,15 @@ R_0
 \alpha \cdot
 \min
 \left(
-\frac{d_i}{D_{\mathrm{ref}}},
+\frac{\ell_i}{D_{\mathrm{ref}}},
 1
 \right)
 -
 P_{\mathrm{late}}\cdot
-\mathbb{I}\left(t_i^{\mathrm{finish}}>d_i^{\mathrm{deadline}}\right)
+\mathbb{I}\left(t_i^{\mathrm{finish}}>D_i\right)
 \right).
 \]
-Here, \(R_0\) is the base reward, \(d_i\) is the service travel distance of task \(i\), \(D_{\mathrm{ref}}\) is the reference distance used for normalization, \(\alpha\) is the normalized distance-cost weight, and \(P_{\mathrm{late}}\) is the penalty for late completion. In our implementation, we use
+Here, \(R_0\) is the base reward, \(\ell_i\) is the service travel distance of task \(i\), \(D_{\mathrm{ref}}\) is the reference distance for normalization, \(\alpha\) is the distance-cost weight, \(P_{\mathrm{late}}\) is the late-completion penalty, and \(D_i\) is the deadline of task \(i\). In our implementation, we use
 \[
 R_0=100,
 \qquad
@@ -74,9 +74,9 @@ Total Tardiness is mainly used for offline MILP result analysis and is defined a
 \[
 \mathrm{TotalTardiness}
 =
-\sum_n \max(0,\mathrm{arr}_n-d_n),
+\sum_n \max(0,\mathrm{arr}_n-D_n),
 \]
-where \(\mathrm{arr}_n\) denotes the arrival time at task \(n\), and \(d_n\) is its deadline.
+where \(\mathrm{arr}_n\) denotes the arrival time at task \(n\), and \(D_n\) is its deadline.
 
 \subsection{Operating Cost Metrics}
 

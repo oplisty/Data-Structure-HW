@@ -1,4 +1,4 @@
-\section{Framework}
+\section{System Framework}
 \label{sec:framework}
 
 \begin{figure*}[t]
@@ -8,15 +8,28 @@
   \label{fig:framework_overview}
 \end{figure*}
 
-This paper designs a layered system architecture for the dynamic collaborative scheduling of new energy logistics fleets. Overall, the system can be divided into five core layers from bottom to top: the data resource layer, the algorithm layer, the simulation engine layer, the backend service layer, and the frontend visualization layer. Although each layer is relatively independent, they are connected through unified data interfaces and state transition logic to form a complete closed loop. This layered design has two main advantages. First, it decouples functions such as road modeling, path planning, scheduling decision-making, simulation execution, and interface presentation, thereby reducing overall system complexity. Second, it allows different path planning algorithms, scheduling strategies, and optimization methods to be flexibly replaced and compared within the same framework, which not only meets the implementation requirements of a course project but also supports further research and future extensions.
+Figure~\ref{fig:framework_overview} shows how the system runs. Instead of testing each algorithm separately, we put all strategies into the same simulation loop. At each step, the simulator releases tasks, updates vehicle states, checks path and battery feasibility, assigns tasks, executes movement or charging, and records statistics. The main modules behind this loop are graph-based environment data, path planning and scheduling algorithms, the simulation engine, backend services, and frontend visualization.
+
+\subsection{Overall Running Process}
+
+The complete simulation loop can be summarized in three stages:
+\begin{enumerate}[leftmargin=*]
+    \item task release and vehicle state update;
+    \item path/battery feasibility checking and scheduling decision;
+    \item movement, service, charging, and statistics update.
+\end{enumerate}
+
+At each time step, the simulator releases new tasks, updates vehicle states, checks path and battery feasibility, assigns tasks to available vehicles, and then executes movement, service, return, or charging. After execution, it updates completed tasks, expired tasks, score, travel distance, and charging queue statistics.
 
 %-------------------------------------------------------------------------
-\subsection{Data Layer}
+\subsection{Graph-based Environment Modeling}
 The data resource layer provides a unified representation of the environment for the whole system and serves as the foundation for subsequent path planning, task scheduling, and state simulation. To satisfy the course requirement of using a graph structure for road representation and routing, this paper first models the urban delivery scenario as a weighted directed graph
 \[
 G=(V,E,W),
 \]
 where the node set \(V\) represents road intersections, depots, candidate task locations, and charging stations; the edge set \(E\subseteq V\times V\) represents road connectivity; and the weight function \(W:E\rightarrow \mathbb{R}^{+}\) describes the distance or travel cost of each edge. Based on this representation, the entire logistics environment can be mapped into a discrete graph space, which provides a computable foundation for shortest-path search, reachability analysis, and energy consumption evaluation.
+
+The simulator supports two types of map data. For controlled experiments, we use randomly generated graph scenarios with different numbers of nodes, vehicles, tasks, and charging stations, so that scheduling strategies can be compared under the same settings. As an extension, the codebase also includes a processed Guangzhou Panyu road-network scenario based on Guangdong Province OSM data. The Panyu road topology is converted into a weighted graph with road points and intersections as nodes, road segments as weighted edges, and charging stations as resource nodes. In the processed metadata, the Panyu map contains 131,276 nodes, 142,593 edges, and 57 charging stations. This allows the same path-planning, scheduling, backend, and frontend pipeline to run on a real urban road network.
 
 In the implementation, the system denotes the depot as node \(v_d\in V\), the set of charging stations as
 \[
@@ -90,7 +103,28 @@ as the task with the highest priority at the current time. The difference betwee
 \]
 \end{itemize}
 
-Beyond the above baselines, we further implement an online reinforcement learning policy selection module based on Q-learning, as well as an offline global optimization module based on MILP under full information. These two modules correspond to two different methodological paradigms: online decision-making based on interactive learning and offline solving based on exact optimization, as summarized in Algorithm~\ref{alg:qlearning_policy} and Algorithm~\ref{alg:offline_milp_planning}.
+\begin{table}[htbp]
+\centering
+\caption{Roles of algorithms and strategies in the system.}
+\label{tab:algorithm_roles}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{ll}
+\toprule
+Algorithm / Strategy & Role in the system \\
+\midrule
+Dijkstra & shortest-path computation and stable routing baseline \\
+A* & goal-directed path search with heuristic acceleration \\
+RRT & extensible path-planning interface for future scenarios \\
+Nearest & selects the nearest task to reduce distance and energy cost \\
+EDF & selects the task with the earliest deadline \\
+Heaviest & selects the task with the largest cargo weight \\
+Q-learning & selects a suitable dispatching rule under the current state \\
+MILP & provides a small-scale offline full-information reference \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Beyond the above baselines, we further implement an online reinforcement learning policy selection module based on Q-learning, as well as an offline global optimization module based on MILP under full information. Q-learning is used as a hyper-heuristic selector rather than an end-to-end route generator. Its state includes coarse information such as task backlog, deadline urgency, average battery level, idle vehicle ratio, and charging queue load. Its action is the choice of a low-level dispatching rule such as Nearest, EDF, Heaviest, or a score-based rule. The reward is related to task completion, travel cost, overdue penalty, and charging or waiting cost. These two advanced modules correspond to two different methodological paradigms: online decision-making based on interactive learning and offline solving based on exact optimization, as summarized in Algorithm~\ref{alg:qlearning_policy} and Algorithm~\ref{alg:offline_milp_planning}.
 
 \begin{figure*}[t]
   \centering
@@ -205,4 +239,3 @@ In implementation, the backend is responsible for unified state packaging and se
 where \(\mathcal{O}_t\) denotes the structured observation result for external interfaces, thereby converting complex low-level states into standardized service outputs.
 
 On this basis, the frontend visualization module further transforms \(\mathcal{O}_t\) into graphical expressions that can be easily understood by users. Specifically, the interface continuously displays the spatial distribution of the road network, depots, task nodes, charging stations, and vehicles, while synchronously updating key indicators such as task completion status, vehicle utilization, path cost, charging queue length, and system score. More importantly, this layer does not only serve as a static display component. It also provides a unified interaction entry for policy switching, offline replay, training triggering, and result comparison. As a result, the multi-source information originally scattered across simulation logs, scheduling outputs, and statistical results is reorganized into a visual workflow for analysis and presentation.
-
